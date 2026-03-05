@@ -1629,3 +1629,23 @@
   outline: none !important;
   box-shadow: none !important;
 }
+.pd-priceRow{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.pd-priceMain{
+  display:flex;
+  align-items:baseline;
+  gap:12px;
+}
+
+.pd-discount{
+  border:1px solid #ef4444;
+  color:#ef4444;
+  font-weight:800;
+  padding:6px 12px;
+  border-radius:8px;
+  font-size:14px;
+}

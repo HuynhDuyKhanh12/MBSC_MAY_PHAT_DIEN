@@ -429,7 +429,10 @@
   color: #334155;
 }
 
-/* promotions */
+/* =========================
+   PROMOTIONS (SỬA GIỐNG HÌNH)
+========================= */
+
 .promoBox {
   margin-top: 12px;
   border-radius: 10px;
@@ -449,70 +452,124 @@
   font-size: 14px;
   color: #111827;
 }
+
+/* nav arrows */
 .promoNav {
   display: inline-flex;
   gap: 8px;
 }
 .promoNav__btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
   border: 1px solid #e5e7eb;
   background: #fff;
   cursor: pointer;
+  display: grid;
+  place-items: center;
 }
 .promoNav__btn:hover {
   background: #f8fafc;
 }
+.promoNav__icon {
+  font-size: 16px;
+  color: #6b7280;
+  line-height: 1;
+}
 
-.promoList {
+/* ✅ list dạng “pages” */
+.promoList--pages {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  gap: 12px;
+  padding-bottom: 4px;
+}
+.promoList--pages::-webkit-scrollbar {
+  display: none;
+}
+
+/* ✅ mỗi page full width, bên trong xếp dọc 2 item */
+.promoPage {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
   display: grid;
   gap: 10px;
 }
 
-.promoItem {
+/* ✅ card item giống hình */
+.promoItem--row {
   border: 1px solid #eee;
-  border-radius: 10px;
+  border-radius: 14px;
+  background: #fff;
   padding: 12px;
   display: grid;
-  grid-template-columns: 48px 1fr auto;
-  gap: 10px;
+  grid-template-columns: 92px 1fr 120px;
   align-items: center;
-  background: #fff;
+  gap: 12px;
 }
 
-.promoIcon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
+/* left art/icon */
+.promoArt {
+  width: 92px;
+  height: 72px;
+  border-radius: 14px;
   background: #f8fafc;
   border: 1px solid #eef2f7;
-  font-size: 22px;
+  display: grid;
+  place-items: center;
+}
+.promoArt__icon {
+  font-size: 34px;
 }
 
+/* info */
 .promoTitle {
   font-weight: 900;
   color: #111827;
-  font-size: 13px;
-  margin-bottom: 2px;
+  font-size: 14px;
+  margin-bottom: 3px;
 }
 .promoDesc {
   font-size: 12px;
   color: #6b7280;
-  margin-bottom: 6px;
+  margin-bottom: 10px;
 }
-.promoMeta {
+.promoMeta--2col {
   display: grid;
-  gap: 2px;
+  gap: 4px;
   font-size: 12px;
   color: #6b7280;
 }
 
+/* right side */
+.promoRight {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+}
+
+.promoInfoBtn {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #111827;
+  font-weight: 900;
+  font-size: 12px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.promoInfoBtn:hover {
+  background: #f8fafc;
+}
+
 .promoCopy {
   height: 30px;
-  padding: 0 10px;
+  padding: 0 12px;
   border-radius: 999px;
   border: 0;
   background: #1d4ed8;
@@ -570,5 +627,14 @@
     justify-content: space-between;
     align-items: center;
     margin-top: 8px;
+  }
+
+  /* promo item co lại cho mobile */
+  .promoItem--row {
+    grid-template-columns: 78px 1fr 112px;
+  }
+  .promoArt {
+    width: 78px;
+    height: 64px;
   }
 }

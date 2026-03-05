@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import "./cart.css";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
@@ -21,7 +21,7 @@ const formatVND = (n: number) =>
 const FALLBACK_IMG =
   "https://images.unsplash.com/photo-1520975958225-2b4f1f8b4a36?auto=format&fit=crop&w=800&q=80";
 
-// ✅ dd/MM/yyyy
+// dd/MM/yyyy
 const formatDateVN = (d: Date) => {
   const dd = String(d.getDate()).padStart(2, "0");
   const mm = String(d.getMonth() + 1).padStart(2, "0");
@@ -29,7 +29,7 @@ const formatDateVN = (d: Date) => {
   return `${dd}/${mm}/${yyyy}`;
 };
 
-// ✅ cộng ngày an toàn
+// cộng ngày an toàn
 const addDays = (base: Date, days: number) => {
   const d = new Date(base);
   d.setHours(12, 0, 0, 0);
@@ -37,7 +37,7 @@ const addDays = (base: Date, days: number) => {
   return d;
 };
 
-// ✅ key yyyy-mm-dd
+// key yyyy-mm-dd
 const dateKey = (d: Date) => {
   const yyyy = d.getFullYear();
   const mm = String(d.getMonth() + 1).padStart(2, "0");
@@ -45,7 +45,35 @@ const dateKey = (d: Date) => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
+type Promo = {
+  id: string;
+  title: string;
+  desc: string;
+  code: string;
+  exp: string;
+  icon: string;
+};
+
+const chunk = <T,>(arr: T[], size: number) => {
+  const out: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+};
+
 const Cart: React.FC = () => {
+  // ✅ REF cho scroll khuyến mãi (dạng trang)
+  const promoRef = useRef<HTMLDivElement | null>(null);
+
+  // ✅ scroll theo “1 trang” (bằng đúng chiều ngang khung)
+  const scrollPromo = (dir: "left" | "right") => {
+    if (!promoRef.current) return;
+    const w = promoRef.current.clientWidth; // 1 page
+    promoRef.current.scrollBy({
+      left: dir === "left" ? -w : w,
+      behavior: "smooth",
+    });
+  };
+
   const [items, setItems] = useState<CartItem[]>([
     {
       id: 1,
@@ -64,7 +92,7 @@ const Cart: React.FC = () => {
 
   const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>("store");
 
-  // ✅ 3 ngày liên tiếp, option hiển thị trực tiếp dd/MM/yyyy
+  // 3 ngày liên tiếp, hiển thị dd/MM/yyyy
   const deliveryDays = useMemo(() => {
     const now = new Date();
     const d0 = addDays(now, 0);
@@ -78,25 +106,25 @@ const Cart: React.FC = () => {
     ];
   }, []);
 
-  // ✅ mặc định chọn hôm nay (theo key)
+  // mặc định chọn hôm nay
   const [deliveryDayKey, setDeliveryDayKey] = useState<string>(() => {
     const now = new Date();
     return dateKey(addDays(now, 0));
   });
 
   const [deliverySlot, setDeliverySlot] = useState("08:00-09:00");
-
   const [confirmed, setConfirmed] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
-  const promotions = useMemo(
+  // ✅ nhiều khuyến mãi hơn
+  const promotions = useMemo<Promo[]>(
     () => [
       {
         id: "FREESHIP300",
         title: "Miễn phí vận chuyển",
         desc: "Đơn hàng từ 300k",
         code: "A87TYRT55",
-        exp: "10/04/2022",
+        exp: "10/04/2026",
         icon: "🚚",
       },
       {
@@ -104,12 +132,63 @@ const Cart: React.FC = () => {
         title: "Giảm 20%",
         desc: "Đơn hàng từ 200k",
         code: "QH5G8J0Y",
-        exp: "05/05/2022",
+        exp: "05/05/2026",
         icon: "🎟️",
+      },
+      {
+        id: "SALE50K",
+        title: "Giảm 50k",
+        desc: "Đơn hàng từ 500k",
+        code: "FT45YU08H",
+        exp: "10/05/2026",
+        icon: "💸",
+      },
+      {
+        id: "SALE10",
+        title: "Giảm 10%",
+        desc: "Đơn hàng từ 100k",
+        code: "A789UYT",
+        exp: "20/05/2026",
+        icon: "🔥",
+      },
+      {
+        id: "FREESHIP1M",
+        title: "Freeship nhanh",
+        desc: "Đơn hàng từ 1.000.000₫",
+        code: "SHIPFAST1M",
+        exp: "15/05/2026",
+        icon: "⚡",
+      },
+      {
+        id: "GIFT",
+        title: "Tặng quà phụ kiện",
+        desc: "Đơn hàng từ 700k",
+        code: "GIFT700",
+        exp: "12/05/2026",
+        icon: "🎁",
+      },
+      {
+        id: "MEMBER5",
+        title: "Thành viên giảm 5%",
+        desc: "Chỉ áp dụng tài khoản thành viên",
+        code: "MEMBER5",
+        exp: "31/05/2026",
+        icon: "👑",
+      },
+      {
+        id: "WEEKEND",
+        title: "Cuối tuần giảm 8%",
+        desc: "Thứ 7 & CN",
+        code: "WKND8",
+        exp: "30/06/2026",
+        icon: "🗓️",
       },
     ],
     []
   );
+
+  // ✅ mỗi “trang” 2 khuyến mãi (xếp dọc giống hình)
+  const promoPages = useMemo(() => chunk(promotions, 2), [promotions]);
 
   const subtotal = useMemo(
     () => items.reduce((sum, it) => sum + it.price * it.qty, 0),
@@ -144,7 +223,6 @@ const Cart: React.FC = () => {
 
   const onConfirmTime = () => {
     setConfirmed(true);
-
     const picked = deliveryDays.find((d) => d.key === deliveryDayKey);
     alert(
       `Đã xác nhận: ${picked?.label ?? ""} - ${deliverySlot.replace("-", " - ")}`
@@ -172,12 +250,6 @@ const Cart: React.FC = () => {
             {/* LEFT */}
             <div className="cartLeft">
               <div className="cartCard">
-                <div className="cartBreadcrumb">
-                  <span>Trang chủ</span>
-                  <span className="cartBreadcrumb__sep">/</span>
-                  <span>Giỏ hàng ({items.length})</span>
-                </div>
-
                 <h2 className="cartTitle">Giỏ hàng của bạn</h2>
                 <p className="cartSub">
                   Bạn đang có <b>{items.length}</b> sản phẩm trong giỏ hàng
@@ -246,7 +318,6 @@ const Cart: React.FC = () => {
 
                           <div className="qty">
                             <button
-                              className="qty__btn"
                               type="button"
                               onClick={() => updateQty(it.id, it.qty - 1)}
                               aria-label="Giảm"
@@ -255,7 +326,6 @@ const Cart: React.FC = () => {
                             </button>
                             <div className="qty__val">{it.qty}</div>
                             <button
-                              className="qty__btn"
                               type="button"
                               onClick={() => updateQty(it.id, it.qty + 1)}
                               aria-label="Tăng"
@@ -333,7 +403,6 @@ const Cart: React.FC = () => {
                         <div className="shipField">
                           <div className="shipField__label">Ngày giao</div>
 
-                          {/* ✅ OPTION HIỂN THỊ NGÀY/THÁNG/NĂM */}
                           <select
                             className="shipSelect"
                             value={deliveryDayKey}
@@ -379,7 +448,13 @@ const Cart: React.FC = () => {
 
                       {confirmed && (
                         <div className="shipConfirmed">
-                          ✅ Đã xác nhận <b>{deliveryDays.find((d) => d.key === deliveryDayKey)?.label}</b>{" "}
+                          ✅ Đã xác nhận{" "}
+                          <b>
+                            {
+                              deliveryDays.find((d) => d.key === deliveryDayKey)
+                                ?.label
+                            }
+                          </b>{" "}
                           - <b>{deliverySlot.replace("-", " - ")}</b>
                         </div>
                       )}
@@ -431,41 +506,75 @@ const Cart: React.FC = () => {
                 </div>
               </div>
 
-              {/* PROMOTIONS */}
+              {/* ✅ PROMOTIONS (đã sửa theo hình) */}
               <div className="promoBox">
                 <div className="promoHead">
                   <div className="promoHead__title">Khuyến mãi dành cho bạn</div>
+
                   <div className="promoNav">
-                    <button type="button" className="promoNav__btn" aria-label="Prev">
-                      ‹
+                    <button
+                      type="button"
+                      className="promoNav__btn"
+                      aria-label="Prev"
+                      onClick={() => scrollPromo("left")}
+                    >
+                      <div className="promoNav__icon">←</div>
                     </button>
-                    <button type="button" className="promoNav__btn" aria-label="Next">
-                      ›
+
+                    <button
+                      type="button"
+                      className="promoNav__btn"
+                      aria-label="Next"
+                      onClick={() => scrollPromo("right")}
+                    >
+                      <div className="promoNav__icon">→</div>
                     </button>
                   </div>
                 </div>
 
-                <div className="promoList">
-                  {promotions.map((p) => (
-                    <div key={p.id} className="promoItem">
-                      <div className="promoIcon">{p.icon}</div>
-                      <div className="promoInfo">
-                        <div className="promoTitle">{p.title}</div>
-                        <div className="promoDesc">{p.desc}</div>
-                        <div className="promoMeta">
-                          <div>
-                            Mã: <b>{p.code}</b>
+                <div className="promoList promoList--pages" ref={promoRef}>
+                  {promoPages.map((page, idx) => (
+                    <div className="promoPage" key={idx}>
+                      {page.map((p) => (
+                        <div key={p.id} className="promoItem promoItem--row">
+                          <div className="promoArt" aria-hidden="true">
+                            <span className="promoArt__icon">{p.icon}</span>
                           </div>
-                          <div>HSD: {p.exp}</div>
+
+                          <div className="promoInfo">
+                            <div className="promoTitle">{p.title}</div>
+                            <div className="promoDesc">{p.desc}</div>
+
+                            <div className="promoMeta promoMeta--2col">
+                              <div>
+                                Mã: <b>{p.code}</b>
+                              </div>
+                              <div>HSD: {p.exp}</div>
+                            </div>
+                          </div>
+
+                          <div className="promoRight">
+                            <button
+                              className="promoInfoBtn"
+                              type="button"
+                              title="Thông tin"
+                              onClick={() =>
+                                alert(`${p.title}\n${p.desc}\nHSD: ${p.exp}`)
+                              }
+                            >
+                              i
+                            </button>
+
+                            <button
+                              className="promoCopy"
+                              type="button"
+                              onClick={() => copyCode(p.code)}
+                            >
+                              SAO CHÉP MÃ
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                      <button
-                        className="promoCopy"
-                        type="button"
-                        onClick={() => copyCode(p.code)}
-                      >
-                        SAO CHÉP MÃ
-                      </button>
+                      ))}
                     </div>
                   ))}
                 </div>

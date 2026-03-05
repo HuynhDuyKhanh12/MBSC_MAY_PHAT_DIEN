@@ -13,7 +13,7 @@ const formatVND = (n: number) =>
   n.toLocaleString("vi-VN", { maximumFractionDigits: 0 }) + "₫";
 
 const Header: React.FC = () => {
-  // Demo cart (sau này bạn thay bằng Redux/Context)
+  // Demo cart
   const [cartItems, setCartItems] = useState<CartItem[]>([
     {
       id: 1,
@@ -39,14 +39,31 @@ const Header: React.FC = () => {
   const [openCart, setOpenCart] = useState(false);
   const cartWrapRef = useRef<HTMLDivElement | null>(null);
 
+  // ✅ Toggle location popup
+  const [openLocation, setOpenLocation] = useState(false);
+  const locationWrapRef = useRef<HTMLDivElement | null>(null);
+
+  // ✅ Demo địa chỉ
+  const [province, setProvince] = useState("Hồ Chí Minh");
+  const [district, setDistrict] = useState("");
+  const defaultAddress = "182 Lê Đại Hành, Quận 11";
+
   // Click outside => close
   useEffect(() => {
     const onDown = (e: MouseEvent) => {
-      if (!cartWrapRef.current) return;
-      if (!cartWrapRef.current.contains(e.target as Node)) {
+      const t = e.target as Node;
+
+      // đóng cart nếu click ngoài
+      if (cartWrapRef.current && !cartWrapRef.current.contains(t)) {
         setOpenCart(false);
       }
+
+      // đóng location nếu click ngoài
+      if (locationWrapRef.current && !locationWrapRef.current.contains(t)) {
+        setOpenLocation(false);
+      }
     };
+
     document.addEventListener("mousedown", onDown);
     return () => document.removeEventListener("mousedown", onDown);
   }, []);
@@ -68,6 +85,15 @@ const Header: React.FC = () => {
   const removeItem = (id: number) => {
     setCartItems((prev) => prev.filter((it) => it.id !== id));
   };
+
+  // Demo danh sách quận theo tỉnh (bạn thay data sau)
+  const districtsByProvince: Record<string, string[]> = {
+    "Hồ Chí Minh": ["Quận 1", "Quận 3", "Quận 5", "Quận 10", "Quận 11", "Thủ Đức"],
+    "Hà Nội": ["Ba Đình", "Hoàn Kiếm", "Đống Đa", "Cầu Giấy"],
+    "Đà Nẵng": ["Hải Châu", "Thanh Khê", "Sơn Trà"],
+  };
+
+  const districtOptions = districtsByProvince[province] ?? [];
 
   return (
     <header className="hd">
@@ -101,14 +127,99 @@ const Header: React.FC = () => {
           </div>
 
           <div className="hd-actions">
-            <div className="hd-action">
-              <span className="hd-action__icon">📍</span>
-              <div>
-                <div className="hd-action__title">Giao hàng</div>
-                <div className="hd-action__sub">Đến địa chỉ...</div>
-              </div>
+            {/* ✅ DELIVERY / LOCATION */}
+            <div className="hd-actionWrap" ref={locationWrapRef}>
+              <button
+                className="hd-action hd-actionBtn"
+                type="button"
+                onClick={() => setOpenLocation((v) => !v)} // ✅ nhấn lần nữa đóng
+                aria-haspopup="dialog"
+                aria-expanded={openLocation}
+              >
+                <span className="hd-action__icon">📍</span>
+                <div className="hd-action__text">
+                  <div className="hd-action__title">
+                    Giao hoặc đến lấy tại <span className="hd-caret">▾</span>
+                  </div>
+                  <div className="hd-action__sub">
+                    {district
+                      ? `${province} • ${district}`
+                      : "Địa điểm mặc định..."}
+                  </div>
+                </div>
+              </button>
+
+              {openLocation && (
+                <div
+                  className="locPop"
+                  role="dialog"
+                  aria-label="Khu vực mua hàng"
+                >
+                  <div className="locPop__arrow" />
+
+                  <div className="locPop__title">KHU VỰC MUA HÀNG</div>
+
+                  <div className="locPop__grid">
+                    <div className="locPop__field">
+                      <label className="locPop__label">Tỉnh/Thành</label>
+                      <select
+                        className="locPop__select"
+                        value={province}
+                        onChange={(e) => {
+                          setProvince(e.target.value);
+                          setDistrict(""); // đổi tỉnh thì reset quận
+                        }}
+                      >
+                        {Object.keys(districtsByProvince).map((p) => (
+                          <option key={p} value={p}>
+                            {p}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="locPop__field">
+                      <label className="locPop__label">Quận/huyện</label>
+                      <select
+                        className="locPop__select"
+                        value={district}
+                        onChange={(e) => setDistrict(e.target.value)}
+                      >
+                        <option value="">- Chọn Quận/Huyện -</option>
+                        {districtOptions.map((d) => (
+                          <option key={d} value={d}>
+                            {d}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="locPop__box">
+                    <div className="locPop__boxTitle">Giao hoặc đến lấy tại:</div>
+                    <div className="locPop__boxSub">
+                      Địa điểm mặc định - {defaultAddress}
+                    </div>
+                  </div>
+
+                  <div className="locPop__hint">
+                    Chọn cửa hàng gần bạn nhất để tối ưu chi phí giao hàng.
+                    <br />
+                    Hoặc đến lấy hàng
+                  </div>
+
+                  <div className="locPop__default">
+                    <div className="locPop__pin">📍</div>
+                    <div>
+                      <div className="locPop__defaultTitle">Địa điểm mặc định</div>
+                      <div className="locPop__defaultSub">{defaultAddress}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
+            {/* ACCOUNT */}
             <div className="hd-action">
               <span className="hd-action__icon">👤</span>
               <div>
@@ -164,9 +275,7 @@ const Header: React.FC = () => {
                                 >
                                   –
                                 </button>
-                                <span className="miniCart__qtyNum">
-                                  {it.qty}
-                                </span>
+                                <span className="miniCart__qtyNum">{it.qty}</span>
                                 <button
                                   className="miniCart__qtyBtn"
                                   type="button"
@@ -226,13 +335,13 @@ const Header: React.FC = () => {
           <a href="/productlist" className="hd-nav__link">
             SẢN PHẨM
           </a>
-          <a href="#" className="hd-nav__link">
-            TRANG SẢN PHẨM
+          <a href="/repair" className="hd-nav__link">
+            ĐĂNG KÝ SỬA CHỮA/BẢO HÀNH
           </a>
-          <a href="#" className="hd-nav__link">
+          <a href="/blog" className="hd-nav__link">
             BLOG
           </a>
-          <a href="#" className="hd-nav__link">
+          <a href="/about" className="hd-nav__link">
             GIỚI THIỆU
           </a>
           <a href="#" className="hd-nav__link">

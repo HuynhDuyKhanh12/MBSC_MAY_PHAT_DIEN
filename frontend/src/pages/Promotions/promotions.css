@@ -1,0 +1,165 @@
+.promoPage {
+  background: #f6f7fb;
+  padding: 20px 0 40px;
+}
+
+.promoContainer {
+  width: min(1200px, calc(100% - 32px));
+  margin: 0 auto;
+}
+
+.promoTop {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.promoH1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 900;
+  color: #111827;
+}
+
+.promoSub {
+  margin-top: 6px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.promoSearch {
+  position: relative;
+  width: min(420px, 100%);
+}
+
+.promoSearch input {
+  width: 100%;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  padding: 0 42px 0 12px;
+  outline: none;
+  background: #fff;
+}
+
+.promoSearch input:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.25);
+}
+
+.promoSearch__icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.7;
+}
+
+.promoGrid {
+  display: grid;
+  gap: 12px;
+}
+
+.promoCard {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 64px 1fr 170px;
+  gap: 14px;
+  align-items: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+}
+
+.promoBadge {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  background: #eef2ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.promoCard__title {
+  font-weight: 900;
+  font-size: 16px;
+  color: #111827;
+}
+
+.promoCard__desc {
+  color: #374151;
+  margin-top: 3px;
+  font-size: 14px;
+}
+
+.promoCard__meta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.promoCard__cond {
+  margin-top: 10px;
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: #374151;
+}
+
+.promoTag {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  font-weight: 700;
+  font-size: 12px;
+  color: #111827;
+}
+
+.promoCondText {
+  color: #6b7280;
+}
+
+.promoBtn {
+  width: 100%;
+  height: 42px;
+  border-radius: 999px;
+  border: 0;
+  background: #ef4444;
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.promoBtn:hover {
+  filter: brightness(0.95);
+}
+
+.promoEmpty {
+  padding: 22px 12px;
+  text-align: center;
+  color: #6b7280;
+  font-weight: 700;
+}
+
+@media (max-width: 860px) {
+  .promoTop {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .promoCard {
+    grid-template-columns: 64px 1fr;
+  }
+  .promoCard__right {
+    grid-column: 1 / -1;
+  }
+}

@@ -1,0 +1,141 @@
+.bdPage {
+  background: #fff;
+  padding: 18px 0 40px;
+}
+
+.bdWrap {
+  width: min(1200px, calc(100% - 32px));
+  margin: 0 auto;
+}
+
+.bdGrid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 18px;
+}
+
+.bdMain {
+  min-width: 0;
+}
+
+.bdH1 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 900;
+  color: #111827;
+}
+
+.bdMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #9ca3af;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.bdHero {
+  border: 1px solid #ececec;
+  background: #fff;
+}
+.bdHero img {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  display: block;
+}
+
+.bdContent {
+  padding: 14px 0 0;
+  color: #374151;
+  line-height: 1.85;
+  font-size: 14px;
+}
+.bdContent h2 {
+  margin: 18px 0 10px;
+  font-size: 16px;
+  font-weight: 900;
+  color: #111827;
+}
+.bdContent ul {
+  padding-left: 18px;
+}
+.bdContent blockquote {
+  margin: 14px 0;
+  padding: 12px 14px;
+  border-left: 3px solid #10b981;
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+/* Related */
+.bdRelated {
+  margin-top: 22px;
+  border-top: 1px solid #eee;
+  padding-top: 14px;
+}
+.bdRelated__head {
+  font-weight: 900;
+  color: #111827;
+  margin-bottom: 10px;
+}
+.bdRelated__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.relCard {
+  text-decoration: none;
+  border: 1px solid #ececec;
+  background: #fff;
+  color: #111827;
+}
+.relCard__img img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  display: block;
+}
+.relCard__title {
+  padding: 10px 10px 6px;
+  font-weight: 900;
+  font-size: 12px;
+  line-height: 1.35;
+}
+.relCard__meta {
+  padding: 0 10px 10px;
+  font-size: 11px;
+  color: #9ca3af;
+}
+.relCard:hover .relCard__title {
+  color: #2563eb;
+}
+
+/* Sidebar reuse (same class names as blog.css) */
+.bdSide {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* back link */
+.bdBack {
+  display: inline-block;
+  text-decoration: none;
+  color: #2563eb;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+/* responsive */
+@media (max-width: 980px) {
+  .bdGrid {
+    grid-template-columns: 1fr;
+  }
+  .bdHero img {
+    height: 240px;
+  }
+  .bdRelated__grid {
+    grid-template-columns: 1fr;
+  }
+}

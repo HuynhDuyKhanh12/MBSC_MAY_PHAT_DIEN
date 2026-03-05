@@ -1,0 +1,264 @@
+.blogPage {
+  background: #fff;
+  padding: 18px 0 40px;
+}
+
+.blogWrap {
+  width: min(1200px, calc(100% - 32px));
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 18px;
+}
+
+/* ===== LEFT: Tin tức ===== */
+.blogTitle {
+  margin: 0 0 14px;
+  font-size: 20px;
+  font-weight: 900;
+  color: #111827;
+}
+
+.blogGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.postCard {
+  border: 1px solid #ececec;
+  background: #fff;
+}
+
+.postCard__media {
+  display: block;
+  height: 170px;
+  overflow: hidden;
+}
+.postCard__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.25s ease;
+}
+.postCard:hover .postCard__media img {
+  transform: scale(1.05);
+}
+
+.postCard__body {
+  padding: 12px 12px 14px;
+}
+
+.postCard__heading {
+  display: inline-block;
+  color: #111827;
+  font-weight: 900;
+  text-decoration: none;
+  line-height: 1.35;
+  font-size: 13px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+.postCard__heading:hover {
+  color: #2563eb;
+}
+
+.postCard__excerpt {
+  margin: 0 0 10px;
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.postCard__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #9ca3af;
+  font-size: 11px;
+}
+
+/* pagination */
+.blogPager {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.blogPager__btn {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+  font-size: 18px;
+}
+.blogPager__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.blogPager__num {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 12px;
+}
+.blogPager__num.isActive {
+  background: #1f2a37;
+  color: #fff;
+  border-color: #1f2a37;
+}
+
+/* ===== RIGHT ===== */
+.blogSide {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ===== Latest accordion card ===== */
+/* FIX QUAN TRỌNG: KHÔNG overflow hidden để badge 2/3/4 không bị cắt */
+.sideCard {
+  border: 1px solid #ececec;
+  border-radius: 6px;
+  background: #fff;
+}
+
+/* header vẫn đẹp bo góc */
+.sideCard__head {
+  width: 100%;
+  background: #fff;
+  border: 0;
+  cursor: pointer;
+  padding: 18px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sideCard__title {
+  font-weight: 900;
+  font-size: 18px;
+  color: #111827;
+}
+
+/* mũi tên xoay */
+.sideCard__chev {
+  font-size: 20px;
+  color: #6b7280;
+  line-height: 1;
+  transform: rotate(0deg);
+  transition: transform 0.18s ease;
+  user-select: none;
+}
+.sideCard__chev.isOpen {
+  transform: rotate(180deg);
+}
+
+/* thu gọn/xổ mượt + CHO PHÉP badge lòi ra */
+.latestCollapse {
+  height: 0;
+  overflow: visible;      /* ✅ quan trọng */
+  border-top: 1px solid #eee;
+  transition: height 0.28s ease;
+}
+
+.latestList {
+  padding: 10px 18px 8px 28px; /* ✅ chừa chỗ cho badge */
+}
+
+.latestItem {
+  position: relative;
+  display: grid;
+  grid-template-columns: 95px 1fr;
+  gap: 14px;
+  padding: 14px 0;
+  text-decoration: none;
+}
+
+.latestItem + .latestItem {
+  border-top: 1px solid #efefef;
+}
+
+.latestItem__badge {
+  position: absolute;
+  left: -14px;
+  top: 22px;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: #1f3a8a;
+  color: #fff;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 22px rgba(31, 58, 138, 0.25);
+  transition: transform 0.2s ease;
+  z-index: 2; /* ✅ đè lên mọi thứ */
+}
+
+.latestItem__thumb {
+  width: 95px;
+  height: 60px;
+  background: #f3f4f6;
+  overflow: hidden;
+  border-radius: 2px;
+}
+.latestItem__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1);
+  transition: transform 0.25s ease;
+}
+
+.latestItem__info {
+  min-width: 0;
+}
+
+.latestItem__title {
+  font-weight: 800;
+  color: #111827;
+  font-size: 14px;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.2s ease;
+}
+
+.latestItem__meta {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+/* hover */
+.latestItem:hover .latestItem__title {
+  color: #2563eb;
+}
+.latestItem:hover .latestItem__thumb img {
+  transform: scale(1.06);
+}
+.latestItem:hover .latestItem__badge {
+  transform: translateY(-2px);
+}
+
+/* responsive */
+@media (max-width: 980px) {
+  .blogWrap {
+    grid-template-columns: 1fr;
+  }
+  .blogGrid {
+    grid-template-columns: 1fr;
+  }
+}

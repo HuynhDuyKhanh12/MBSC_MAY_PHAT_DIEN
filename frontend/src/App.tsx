@@ -7,12 +7,14 @@ import Blog from "./pages/Blog/Blog";
 import BlogDetail from "./pages/Blog/BlogDetail";
 import RepairRegister from "./pages/RepairRegister/RepairRegister";
 import Promotions from "./pages/Promotions/Promotions";
+import ProductDetail from "./pages/ProductDetail/ProductDetail";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/productlist" element={<ProductList />} />
+        <Route path="/san-pham/:id" element={<ProductDetail />} />
         <Route path="/" element={<Home />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/promotions" element={<Promotions />} />
@@ -20,6 +22,7 @@ export default function App() {
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:id" element={<BlogDetail />} />
         <Route path="/repair" element={<RepairRegister />} />
+        
       </Routes>
     </BrowserRouter>
   );

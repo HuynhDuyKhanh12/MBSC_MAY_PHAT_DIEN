@@ -208,7 +208,16 @@ export default function ProductList() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [activeImg, setActiveImg] = useState<string>("");
 
-  const onAddToCart = (p: Product) => alert(`Đã thêm vào giỏ: ${p.name}`);
+  // ✅ Qty state
+  const [qty, setQty] = useState(1);
+  const MIN_QTY = 1;
+  const MAX_QTY = 99;
+
+  // ✅ onAddToCart nhận qty
+  const onAddToCart = (p: Product, q: number) => {
+    alert(`Đã thêm vào giỏ: ${p.name} (SL: ${q})`);
+    // TODO: sau này bạn thay bằng logic add cart thật (context/redux/localStorage/api)
+  };
 
   const sorted = useMemo(() => {
     const arr = [...PRODUCTS];
@@ -276,6 +285,10 @@ export default function ProductList() {
     setSelected(p);
     setActiveIndex(0);
     setActiveImg(first);
+
+    // ✅ reset qty mỗi lần mở modal
+    setQty(MIN_QTY);
+
     setOpen(true);
   };
 
@@ -292,6 +305,15 @@ export default function ProductList() {
     if (open) window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
+
+  // ✅ helpers qty
+  const decQty = () => setQty((q) => Math.max(MIN_QTY, q - 1));
+  const incQty = () => setQty((q) => Math.min(MAX_QTY, q + 1));
+  const onQtyInput = (v: string) => {
+    const n = Number(v);
+    if (Number.isNaN(n)) return;
+    setQty(Math.min(MAX_QTY, Math.max(MIN_QTY, Math.floor(n))));
+  };
 
   return (
     <>
@@ -392,7 +414,7 @@ export default function ProductList() {
                       <button
                         className={`p-addcart ${p.isOutOfStock ? "is-out" : ""}`}
                         type="button"
-                        onClick={() => !p.isOutOfStock && onAddToCart(p)}
+                        onClick={() => !p.isOutOfStock && onAddToCart(p, 1)} // list add nhanh = 1
                         disabled={p.isOutOfStock}
                       >
                         <span className="p-addcart__label">
@@ -409,7 +431,7 @@ export default function ProductList() {
             })}
           </div>
 
-          {/* Pagination */}
+          {/* Pagination giữ nguyên... */}
           <div className="p-pagination">
             <button className="p-page-btn" type="button" onClick={goPrevPage} disabled={safePage === 1}>
               ← Trước
@@ -487,6 +509,9 @@ export default function ProductList() {
           setActiveImg(imgs[next] || FALLBACK_IMG);
         };
 
+        const disableDec = qty <= MIN_QTY;
+        const disableInc = qty >= MAX_QTY;
+
         return (
           <div className="p-modal" role="dialog" aria-modal="true" onClick={closeQuickView}>
             <div className="p-modal__box" onClick={(e) => e.stopPropagation()}>
@@ -526,23 +551,12 @@ export default function ProductList() {
                     </div>
 
                     {imgs.length > 1 && canPrev && (
-                      <button
-                        className="p-modal__nav p-modal__nav--prev"
-                        type="button"
-                        onClick={goPrevImg}
-                        aria-label="Prev"
-                      >
+                      <button className="p-modal__nav p-modal__nav--prev" type="button" onClick={goPrevImg} aria-label="Prev">
                         ‹
                       </button>
                     )}
-
                     {imgs.length > 1 && canNext && (
-                      <button
-                        className="p-modal__nav p-modal__nav--next"
-                        type="button"
-                        onClick={goNextImg}
-                        aria-label="Next"
-                      >
+                      <button className="p-modal__nav p-modal__nav--next" type="button" onClick={goNextImg} aria-label="Next">
                         ›
                       </button>
                     )}
@@ -597,24 +611,56 @@ export default function ProductList() {
                     {discountPct > 0 && <div className="p-modal__pct">-{discountPct}%</div>}
                   </div>
 
+                  {/* ✅ QTY */}
                   <div className="p-modal__qtyRow">
                     <div className="p-modal__qtyLabel">Số lượng:</div>
 
                     <div className="p-qty">
-                      <button className="p-qty__btn" type="button" aria-label="minus">−</button>
-                      <span className="p-qty__num">1</span>
-                      <button className="p-qty__btn" type="button" aria-label="plus">+</button>
+                      <button
+                        className="p-qty__btn"
+                        type="button"
+                        aria-label="minus"
+                        onClick={decQty}
+                        disabled={disableDec}
+                      >
+                        −
+                      </button>
+
+                      {/* bạn thích span thì giữ span; input cho nhập số tiện hơn */}
+                      <input
+                        className="p-qty__num"
+                        value={qty}
+                        onChange={(e) => onQtyInput(e.target.value)}
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        aria-label="quantity"
+                      />
+
+                      <button
+                        className="p-qty__btn"
+                        type="button"
+                        aria-label="plus"
+                        onClick={incQty}
+                        disabled={disableInc}
+                      >
+                        +
+                      </button>
                     </div>
                   </div>
 
-                  <button
-                    className="p-modal__add"
-                    type="button"
-                    disabled={!!selected.isOutOfStock}
-                    onClick={() => !selected.isOutOfStock && onAddToCart(selected)}
-                  >
-                    THÊM VÀO GIỎ
-                  </button>
+                    <button
+                      className="p-modal__add"
+                      type="button"
+                      disabled={!!selected.isOutOfStock}
+                      onClick={() => {
+                        if (!selected.isOutOfStock) {
+                          onAddToCart(selected, qty);
+                          setQty(1); // reset số lượng về 1
+                        }
+                      }}
+                    >
+                      THÊM VÀO GIỎ
+                    </button>
 
                   <div className="p-modal__share">
                     <div className="p-modal__shareLabel">Chia sẻ:</div>

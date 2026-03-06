@@ -8,11 +8,14 @@ import Blog from "./pages/Blog/Blog";
 import BlogDetail from "./pages/Blog/BlogDetail";
 import RepairRegister from "./pages/RepairRegister/RepairRegister";
 import Promotions from "./pages/Promotions/Promotions";
+import ProductDetail from "./pages/ProductDetail/ProductDetail";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/productlist" element={<ProductList />} />
+        <Route path="/san-pham/:id" element={<ProductDetail />} />
         <Route path="/" element={<Home />} />
         <Route path="/productlist" element={<ProductList />} />
         <Route path="/cart" element={<Cart />} />

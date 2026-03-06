@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import Home from "./pages/Home/Home";
 import ProductList from "./pages/ProductList/ProductList";
 import Cart from "./pages/Cart/Cart";
@@ -8,12 +9,12 @@ import BlogDetail from "./pages/Blog/BlogDetail";
 import RepairRegister from "./pages/RepairRegister/RepairRegister";
 import Promotions from "./pages/Promotions/Promotions";
 
-export default function App() {
+function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/productlist" element={<ProductList />} />
         <Route path="/" element={<Home />} />
+        <Route path="/productlist" element={<ProductList />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/promotions" element={<Promotions />} />
         <Route path="/about" element={<About />} />
@@ -24,3 +25,5 @@ export default function App() {
     </BrowserRouter>
   );
 }
+
+export default App;

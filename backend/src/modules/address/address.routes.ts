@@ -17,6 +17,9 @@ const router = Router();
  *     tags: [Addresses]
  *     security:
  *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Get addresses successful
  */
 router.get("/", authMiddleware, getAddresses);
 
@@ -28,6 +31,47 @@ router.get("/", authMiddleware, getAddresses);
  *     tags: [Addresses]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - fullName
+ *               - phone
+ *               - province
+ *               - district
+ *               - ward
+ *               - detailAddress
+ *             properties:
+ *               fullName:
+ *                 type: string
+ *                 example: Nguyễn Văn A
+ *               phone:
+ *                 type: string
+ *                 example: 0901234567
+ *               province:
+ *                 type: string
+ *                 example: Hồ Chí Minh
+ *               district:
+ *                 type: string
+ *                 example: Quận 1
+ *               ward:
+ *                 type: string
+ *                 example: Phường Bến Nghé
+ *               detailAddress:
+ *                 type: string
+ *                 example: 123 Lê Lợi
+ *               postalCode:
+ *                 type: string
+ *                 example: 700000
+ *               isDefault:
+ *                 type: boolean
+ *                 example: true
+ *     responses:
+ *       201:
+ *         description: Create address successful
  */
 router.post("/", authMiddleware, createAddress);
 
@@ -39,6 +83,46 @@ router.post("/", authMiddleware, createAddress);
  *     tags: [Addresses]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               fullName:
+ *                 type: string
+ *                 example: Nguyễn Văn A
+ *               phone:
+ *                 type: string
+ *                 example: 0901234567
+ *               province:
+ *                 type: string
+ *                 example: Hồ Chí Minh
+ *               district:
+ *                 type: string
+ *                 example: Quận 1
+ *               ward:
+ *                 type: string
+ *                 example: Phường Bến Nghé
+ *               detailAddress:
+ *                 type: string
+ *                 example: 123 Lê Lợi
+ *               postalCode:
+ *                 type: string
+ *                 example: 700000
+ *               isDefault:
+ *                 type: boolean
+ *                 example: false
+ *     responses:
+ *       200:
+ *         description: Update address successful
  */
 router.put("/:id", authMiddleware, updateAddress);
 
@@ -50,6 +134,15 @@ router.put("/:id", authMiddleware, updateAddress);
  *     tags: [Addresses]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Delete address successful
  */
 router.delete("/:id", authMiddleware, deleteAddress);
 

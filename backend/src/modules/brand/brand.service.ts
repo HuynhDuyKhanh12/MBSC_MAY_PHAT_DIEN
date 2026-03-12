@@ -1,6 +1,20 @@
 import { prisma } from "../../config/prisma";
 
-export const createBrandService = async (data: any) => {
+type CreateBrandInput = {
+  name: string;
+  slug: string;
+  logo?: string;
+  description?: string;
+};
+
+type UpdateBrandInput = {
+  name?: string;
+  slug?: string;
+  logo?: string;
+  description?: string;
+};
+
+export const createBrandService = async (data: CreateBrandInput) => {
   return prisma.brand.create({
     data: {
       name: data.name,
@@ -13,42 +27,56 @@ export const createBrandService = async (data: any) => {
 
 export const getBrandsService = async () => {
   return prisma.brand.findMany({
-    where: { deletedAt: null },
+    where: {
+      deletedAt: null,
+    },
     include: {
       products: {
-        where: { deletedAt: null },
+        where: {
+          deletedAt: null,
+        },
       },
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: {
+      createdAt: "desc",
+    },
   });
 };
 
 export const getBrandByIdService = async (id: number) => {
-  return prisma.brand.findUnique({
-    where: { id },
+  return prisma.brand.findFirst({
+    where: {
+      id,
+    },
     include: {
       products: {
-        where: { deletedAt: null },
+        where: {
+          deletedAt: null,
+        },
       },
     },
   });
 };
 
-export const updateBrandService = async (id: number, data: any) => {
+export const updateBrandService = async (id: number, data: UpdateBrandInput) => {
   return prisma.brand.update({
-    where: { id },
+    where: {
+      id,
+    },
     data: {
-      name: data.name,
-      slug: data.slug,
-      logo: data.logo,
-      description: data.description,
+      ...(data.name !== undefined && { name: data.name }),
+      ...(data.slug !== undefined && { slug: data.slug }),
+      ...(data.logo !== undefined && { logo: data.logo }),
+      ...(data.description !== undefined && { description: data.description }),
     },
   });
 };
 
 export const deleteBrandService = async (id: number) => {
   return prisma.brand.update({
-    where: { id },
+    where: {
+      id,
+    },
     data: {
       deletedAt: new Date(),
     },

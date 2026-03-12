@@ -2,6 +2,18 @@ import { prisma } from "../../config/prisma";
 
 const generateOrderCode = () => "ORD" + Date.now();
 
+export const getOrderByIdService = async (id: number) => {
+  return prisma.order.findUnique({
+    where: { id },
+    include: {
+      items: true,
+      coupon: true,
+      address: true,
+      user: true,
+    },
+  });
+};
+
 export const createOrderService = async (userId: number, payload: any) => {
   const cart = await prisma.cart.findUnique({
     where: { userId },
@@ -22,10 +34,16 @@ export const createOrderService = async (userId: number, payload: any) => {
   let subtotal = 0;
 
   for (const item of cart.items) {
+    if (!item.product || item.product.deletedAt || item.product.status !== "ACTIVE") {
+      throw new Error(`Product ${item.productId} is unavailable`);
+    }
+
     subtotal += Number(item.unitPrice) * item.quantity;
 
-    if (item.variantId && item.variant && item.variant.stock < item.quantity) {
-      throw new Error(`Variant ${item.variant.sku} out of stock`);
+    if (item.variantId && item.variant) {
+      if ((item.variant.stock ?? 0) < item.quantity) {
+        throw new Error(`Variant ${item.variant.sku} out of stock`);
+      }
     }
   }
 
@@ -35,37 +53,59 @@ export const createOrderService = async (userId: number, payload: any) => {
   if (payload.couponCode) {
     const coupon = await prisma.coupon.findFirst({
       where: {
-        code: payload.couponCode,
+        code: String(payload.couponCode).trim().toUpperCase(),
         isActive: true,
         startDate: { lte: new Date() },
         endDate: { gte: new Date() },
       },
     });
 
-    if (coupon) {
-      couponId = coupon.id;
+    if (!coupon) {
+      throw new Error("Coupon is invalid or expired");
+    }
 
-      if (coupon.discountType === "PERCENT") {
-        discountAmount = (subtotal * Number(coupon.discountValue)) / 100;
-
-        if (coupon.maxDiscountValue) {
-          discountAmount = Math.min(discountAmount, Number(coupon.maxDiscountValue));
-        }
-      } else {
-        discountAmount = Number(coupon.discountValue);
+    if (coupon.usageLimit !== null && coupon.usageLimit !== undefined) {
+      if ((coupon.usedCount ?? 0) >= coupon.usageLimit) {
+        throw new Error("Coupon usage limit exceeded");
       }
+    }
+
+    if (
+      coupon.minOrderValue !== null &&
+      coupon.minOrderValue !== undefined &&
+      subtotal < Number(coupon.minOrderValue)
+    ) {
+      throw new Error("Order does not meet minimum value for coupon");
+    }
+
+    couponId = coupon.id;
+
+    if (coupon.discountType === "PERCENT") {
+      discountAmount = (subtotal * Number(coupon.discountValue)) / 100;
+
+      if (
+        coupon.maxDiscountValue !== null &&
+        coupon.maxDiscountValue !== undefined
+      ) {
+        discountAmount = Math.min(
+          discountAmount,
+          Number(coupon.maxDiscountValue)
+        );
+      }
+    } else {
+      discountAmount = Number(coupon.discountValue);
     }
   }
 
-  const shippingFee = payload.shippingFee || 0;
-  const totalAmount = subtotal - discountAmount + shippingFee;
+  const shippingFee = Number(payload.shippingFee || 0);
+  const totalAmount = Math.max(0, subtotal - discountAmount + shippingFee);
 
   return prisma.$transaction(async (tx) => {
     const order = await tx.order.create({
       data: {
         code: generateOrderCode(),
         userId,
-        addressId: payload.addressId,
+        addressId: payload.addressId ?? null,
         couponId,
         status: "PENDING",
         paymentMethod: payload.paymentMethod,
@@ -98,6 +138,8 @@ export const createOrderService = async (userId: number, payload: any) => {
       },
       include: {
         items: true,
+        coupon: true,
+        address: true,
       },
     });
 
@@ -127,6 +169,17 @@ export const createOrderService = async (userId: number, payload: any) => {
         data: {
           soldCount: {
             increment: item.quantity,
+          },
+        },
+      });
+    }
+
+    if (couponId) {
+      await tx.coupon.update({
+        where: { id: couponId },
+        data: {
+          usedCount: {
+            increment: 1,
           },
         },
       });
@@ -164,9 +217,15 @@ export const getAllOrdersService = async () => {
   });
 };
 
-export const updateOrderStatusService = async (id: number, status: any) => {
+export const updateOrderStatusService = async (id: number, status: string) => {
   return prisma.order.update({
     where: { id },
-    data: { status },
+    data: { status: status as any },
+    include: {
+      user: true,
+      items: true,
+      coupon: true,
+      address: true,
+    },
   });
 };

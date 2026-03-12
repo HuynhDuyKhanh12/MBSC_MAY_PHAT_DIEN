@@ -37,6 +37,8 @@ router.get("/", getBrands);
  *     responses:
  *       200:
  *         description: Get brand successful
+ *       404:
+ *         description: Brand not found
  */
 router.get("/:id", getBrandById);
 
@@ -48,6 +50,27 @@ router.get("/:id", getBrandById);
  *     tags: [Brands]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Honda
+ *               slug:
+ *                 type: string
+ *                 example: honda
+ *               description:
+ *                 type: string
+ *                 example: Thương hiệu máy phát điện Honda
+ *               logo:
+ *                 type: string
+ *                 example: https://example.com/honda.png
  *     responses:
  *       201:
  *         description: Create brand successful
@@ -68,9 +91,30 @@ router.post("/", authMiddleware, requireRole("ADMIN"), createBrand);
  *         required: true
  *         schema:
  *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Honda Updated
+ *               slug:
+ *                 type: string
+ *                 example: honda-updated
+ *               description:
+ *                 type: string
+ *                 example: Mô tả mới
+ *               logo:
+ *                 type: string
+ *                 example: https://example.com/new-logo.png
  *     responses:
  *       200:
  *         description: Update brand successful
+ *       404:
+ *         description: Brand not found
  */
 router.put("/:id", authMiddleware, requireRole("ADMIN"), updateBrand);
 
@@ -91,6 +135,8 @@ router.put("/:id", authMiddleware, requireRole("ADMIN"), updateBrand);
  *     responses:
  *       200:
  *         description: Delete brand successful
+ *       404:
+ *         description: Brand not found
  */
 router.delete("/:id", authMiddleware, requireRole("ADMIN"), deleteBrand);
 

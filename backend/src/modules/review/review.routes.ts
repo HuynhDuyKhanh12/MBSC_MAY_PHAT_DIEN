@@ -14,6 +14,15 @@ const router = Router();
  *   get:
  *     summary: Lấy đánh giá theo sản phẩm
  *     tags: [Reviews]
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Get reviews successful
  */
 router.get("/product/:productId", getReviewsByProduct);
 
@@ -25,6 +34,28 @@ router.get("/product/:productId", getReviewsByProduct);
  *     tags: [Reviews]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - productId
+ *               - rating
+ *             properties:
+ *               productId:
+ *                 type: integer
+ *                 example: 1
+ *               rating:
+ *                 type: integer
+ *                 example: 5
+ *               comment:
+ *                 type: string
+ *                 example: Sản phẩm dùng tốt, rất ổn
+ *     responses:
+ *       201:
+ *         description: Create review successful
  */
 router.post("/", authMiddleware, createReview);
 
@@ -36,6 +67,15 @@ router.post("/", authMiddleware, createReview);
  *     tags: [Reviews]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Delete review successful
  */
 router.delete("/:id", authMiddleware, requireRole("ADMIN"), deleteReview);
 

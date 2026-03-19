@@ -9,6 +9,8 @@ import BlogDetail from "./pages/Blog/BlogDetail";
 import RepairRegister from "./pages/RepairRegister/RepairRegister";
 import Promotions from "./pages/Promotions/Promotions";
 import ProductDetail from "./pages/ProductDetail/ProductDetail";
+import Repair from "./pages/Repair/Repair";
+import Auth from "./pages/Auth/Auth";
 
 import AdminLayout from "./admin/layout/AdminLayout";
 import DashboardPage from "./admin/dashboard/DashboardPage";
@@ -34,6 +36,7 @@ import ReviewPage from "./admin/review/ReviewPage";
 import ReviewCreatePage from "./admin/review/ReviewCreatePage";
 import AuthPage from "./admin/auth/AuthPage";
 import AuthCreatePage from "./admin/auth/AuthCreatePage";
+import AdminLogin from "./admin/AdminLogin";
 
 function App() {
   return (
@@ -48,9 +51,12 @@ function App() {
         <Route path="blog" element={<Blog />} />
         <Route path="blog/:id" element={<BlogDetail />} />
         <Route path="repair" element={<RepairRegister />} />
+        <Route path="/repair" element={<Repair />} />
+        <Route path="/auth" element={<Auth />} />
 
-        <Route path="/admin" element={<AdminLayout />}>
+        <Route path="/admin" element={<AdminLayout />}  >
           <Route index element={<DashboardPage />} />
+          <Route path="login" element={<AdminLogin />} />
           <Route path="product" element={<ProductPage />} />
           <Route path="product/create" element={<ProductCreatePage />} />
           <Route path="category" element={<CategoryPage />} />

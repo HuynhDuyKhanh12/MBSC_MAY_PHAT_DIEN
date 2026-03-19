@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./header.css";
+import { Link } from "react-router-dom";
 
 type CartItem = {
   id: number;
@@ -13,7 +14,6 @@ const formatVND = (n: number) =>
   n.toLocaleString("vi-VN", { maximumFractionDigits: 0 }) + "₫";
 
 const Header: React.FC = () => {
-  // Demo cart
   const [cartItems, setCartItems] = useState<CartItem[]>([
     {
       id: 1,
@@ -35,30 +35,24 @@ const Header: React.FC = () => {
     [cartItems]
   );
 
-  // Toggle mini cart
   const [openCart, setOpenCart] = useState(false);
   const cartWrapRef = useRef<HTMLDivElement | null>(null);
 
-  // ✅ Toggle location popup
   const [openLocation, setOpenLocation] = useState(false);
   const locationWrapRef = useRef<HTMLDivElement | null>(null);
 
-  // ✅ Demo địa chỉ
   const [province, setProvince] = useState("Hồ Chí Minh");
   const [district, setDistrict] = useState("");
   const defaultAddress = "182 Lê Đại Hành, Quận 11";
 
-  // Click outside => close
   useEffect(() => {
     const onDown = (e: MouseEvent) => {
       const t = e.target as Node;
 
-      // đóng cart nếu click ngoài
       if (cartWrapRef.current && !cartWrapRef.current.contains(t)) {
         setOpenCart(false);
       }
 
-      // đóng location nếu click ngoài
       if (locationWrapRef.current && !locationWrapRef.current.contains(t)) {
         setOpenLocation(false);
       }
@@ -86,7 +80,6 @@ const Header: React.FC = () => {
     setCartItems((prev) => prev.filter((it) => it.id !== id));
   };
 
-  // Demo danh sách quận theo tỉnh (bạn thay data sau)
   const districtsByProvince: Record<string, string[]> = {
     "Hồ Chí Minh": ["Quận 1", "Quận 3", "Quận 5", "Quận 10", "Quận 11", "Thủ Đức"],
     "Hà Nội": ["Ba Đình", "Hoàn Kiếm", "Đống Đa", "Cầu Giấy"],
@@ -97,7 +90,6 @@ const Header: React.FC = () => {
 
   return (
     <header className="hd">
-      {/* Top bar */}
       <div className="hd-top">
         <div className="container hd-top__inner">
           <span className="hd-top__left">
@@ -111,7 +103,6 @@ const Header: React.FC = () => {
         </div>
       </div>
 
-      {/* Main header */}
       <div className="hd-main">
         <div className="container hd-main__inner">
           <div className="hd-logo">FLYCAM24H</div>
@@ -127,12 +118,11 @@ const Header: React.FC = () => {
           </div>
 
           <div className="hd-actions">
-            {/* ✅ DELIVERY / LOCATION */}
             <div className="hd-actionWrap" ref={locationWrapRef}>
               <button
                 className="hd-action hd-actionBtn"
                 type="button"
-                onClick={() => setOpenLocation((v) => !v)} // ✅ nhấn lần nữa đóng
+                onClick={() => setOpenLocation((v) => !v)}
                 aria-haspopup="dialog"
                 aria-expanded={openLocation}
               >
@@ -150,11 +140,7 @@ const Header: React.FC = () => {
               </button>
 
               {openLocation && (
-                <div
-                  className="locPop"
-                  role="dialog"
-                  aria-label="Khu vực mua hàng"
-                >
+                <div className="locPop" role="dialog" aria-label="Khu vực mua hàng">
                   <div className="locPop__arrow" />
 
                   <div className="locPop__title">KHU VỰC MUA HÀNG</div>
@@ -167,7 +153,7 @@ const Header: React.FC = () => {
                         value={province}
                         onChange={(e) => {
                           setProvince(e.target.value);
-                          setDistrict(""); // đổi tỉnh thì reset quận
+                          setDistrict("");
                         }}
                       >
                         {Object.keys(districtsByProvince).map((p) => (
@@ -220,13 +206,13 @@ const Header: React.FC = () => {
             </div>
 
             {/* ACCOUNT */}
-            <div className="hd-action">
+            <Link to="/auth" className="hd-action hd-action--link">
               <span className="hd-action__icon">👤</span>
               <div>
                 <div className="hd-action__title">Đăng nhập / Đăng ký</div>
                 <div className="hd-action__sub">Tài khoản</div>
               </div>
-            </div>
+            </Link>
 
             {/* CART */}
             <div className="hd-cartWrap" ref={cartWrapRef}>
@@ -318,7 +304,6 @@ const Header: React.FC = () => {
           </div>
         </div>
 
-        {/* Sub info */}
         <div className="container hd-sub">
           <span>✅ Đảm bảo chất lượng</span>
           <span>🚚 Miễn phí vận chuyển</span>
@@ -326,27 +311,14 @@ const Header: React.FC = () => {
         </div>
       </div>
 
-      {/* Nav */}
       <nav className="hd-nav">
         <div className="container hd-nav__inner">
-          <a href="/" className="hd-nav__link">
-            TRANG CHỦ
-          </a>
-          <a href="/productlist" className="hd-nav__link">
-            SẢN PHẨM
-          </a>
-          <a href="/repair" className="hd-nav__link">
-            ĐĂNG KÝ SỬA CHỮA/BẢO HÀNH
-          </a>
-          <a href="/blog" className="hd-nav__link">
-            BLOG
-          </a>
-          <a href="/about" className="hd-nav__link">
-            GIỚI THIỆU
-          </a>
-          <a href="#" className="hd-nav__link">
-            LANDING PAGE
-          </a>
+          <a href="/" className="hd-nav__link">TRANG CHỦ</a>
+          <a href="/productlist" className="hd-nav__link">SẢN PHẨM</a>
+          <a href="/repair" className="hd-nav__link">ĐĂNG KÝ SỬA CHỮA/BẢO HÀNH</a>
+          <a href="/blog" className="hd-nav__link">BLOG</a>
+          <a href="/about" className="hd-nav__link">GIỚI THIỆU</a>
+          <a href="#" className="hd-nav__link">LANDING PAGE</a>
 
           <div className="hd-nav__right">
             <span className="live">🔴 Live stream</span>

@@ -2,27 +2,42 @@
   box-sizing: border-box;
 }
 
-body {
+html,
+body,
+#root {
   margin: 0;
+  padding: 0;
+  min-height: 100%;
   font-family: Arial, Helvetica, sans-serif;
   background: #f2f4f8;
   color: #1f2937;
 }
 
-.admin {
-  display: flex;
-  min-height: 100vh;
-  overflow: hidden;
+body {
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
-/* SIDEBAR */
+.admin {
+  min-height: 100vh;
+  background: #f2f4f8;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
 .sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 270px;
+  height: 100vh;
   background: #2f3542;
   color: #fff;
-  flex-shrink: 0;
   display: flex;
   flex-direction: column;
+  z-index: 1000;
+  overflow-y: auto;
 }
 
 .sidebar__top {
@@ -31,6 +46,7 @@ body {
   gap: 14px;
   padding: 16px 18px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  min-height: 72px;
 }
 
 .sidebar__logoCircle {
@@ -42,6 +58,7 @@ body {
   display: grid;
   place-items: center;
   font-size: 22px;
+  flex-shrink: 0;
 }
 
 .sidebar__title {
@@ -70,6 +87,7 @@ body {
   width: 100%;
   font-size: 14px;
   cursor: pointer;
+  transition: 0.2s ease;
 }
 
 .sidebar__itemLeft {
@@ -106,6 +124,7 @@ body {
   margin-left: 8px;
   font-size: 13px;
   line-height: 1.35;
+  transition: 0.2s ease;
 }
 
 .sidebar__subitem:hover,
@@ -123,28 +142,147 @@ body {
   flex-shrink: 0;
 }
 
-/* MAIN */
+/* =========================
+   MAIN
+========================= */
 .main {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
+  margin-left: 270px;
+  width: calc(100% - 270px);
+  min-height: 100vh;
+  position: relative;
 }
 
+/* =========================
+   TOPBAR
+========================= */
 .topbar {
-  height: 64px;
+  position: fixed;
+  top: 0;
+  left: 270px;
+  width: calc(100% - 270px);
+  height: 72px;
   background: #fff;
   border-bottom: 1px solid #dfe3ea;
-  padding: 0 22px;
+  padding: 0 24px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  z-index: 999;
 }
 
+.topbar__title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.topbar__right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* =========================
+   PROFILE TOPBAR
+========================= */
+.profileInline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  padding: 8px 14px;
+  border-radius: 999px;
+  min-height: 52px;
+}
+
+.profileBox__avatar {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  border: 2px solid #e5e7eb;
+}
+
+.profileBox__avatar--icon {
+  background: #e5e7eb;
+  color: #4b5563;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.profileBox__info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.2;
+}
+
+.profileBox__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+  white-space: nowrap;
+}
+
+.profileBox__role {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 3px;
+  white-space: nowrap;
+}
+
+/* =========================
+   LOGIN / LOGOUT BUTTON
+========================= */
+.loginBtn {
+  height: 44px;
+  border: none;
+  border-radius: 12px;
+  background: #2563eb;
+  color: #fff;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+.loginBtn:hover {
+  background: #1d4ed8;
+}
+
+.loginBtn--logout {
+  background: #ef4444;
+}
+
+.loginBtn--logout:hover {
+  background: #dc2626;
+}
+
+/* =========================
+   CONTENT
+========================= */
 .content {
+  margin-top: 72px;
+  min-height: calc(100vh - 72px);
+  height: auto;
   padding: 20px;
-  overflow-x: hidden;
+  overflow: visible;
 }
 
-/* OLD PAGE GRID */
+/* =========================
+   PAGE GRID
+========================= */
 .page {
   display: grid;
   grid-template-columns: 320px minmax(0, 1fr);
@@ -152,7 +290,9 @@ body {
   align-items: start;
 }
 
-/* CARD */
+/* =========================
+   CARD
+========================= */
 .card {
   background: #fff;
   border: 1px solid #dfe3ea;
@@ -167,7 +307,9 @@ body {
   font-size: 20px;
 }
 
-/* FORM */
+/* =========================
+   FORM
+========================= */
 .form-group {
   margin-bottom: 14px;
 }
@@ -199,7 +341,9 @@ body {
   background: #fff;
 }
 
-/* BASIC BUTTON */
+/* =========================
+   BASIC BUTTON
+========================= */
 .btn {
   border: 0;
   border-radius: 6px;
@@ -221,7 +365,9 @@ body {
   background: #ef4444;
 }
 
-/* PAGE SHELL */
+/* =========================
+   PAGE SHELL
+========================= */
 .adminPageShell {
   width: 100%;
 }
@@ -252,7 +398,9 @@ body {
   font-size: 14px;
 }
 
-/* PANEL */
+/* =========================
+   PANEL
+========================= */
 .adminPanel {
   background: #fff;
   border: 1px solid #dfe3ea;
@@ -264,7 +412,9 @@ body {
   padding: 16px;
 }
 
-/* TOOLBAR */
+/* =========================
+   TOOLBAR
+========================= */
 .adminToolbar {
   padding: 12px 16px;
   border-bottom: 1px solid #e5e7eb;
@@ -314,7 +464,9 @@ body {
   border-color: #60a5fa;
 }
 
-/* ADMIN BUTTON */
+/* =========================
+   ADMIN BUTTON
+========================= */
 .adminBtn {
   height: 38px;
   border: none;
@@ -341,7 +493,9 @@ body {
   background: #ef4444;
 }
 
-/* TABLE */
+/* =========================
+   TABLE
+========================= */
 .table-wrap {
   width: 100%;
   overflow-x: auto;
@@ -372,7 +526,6 @@ th {
   font-weight: 700;
 }
 
-/* TABLE CARD MODE */
 .card.card--table {
   border: none;
   padding: 0;
@@ -397,7 +550,9 @@ th {
   display: block;
 }
 
-/* ACTION */
+/* =========================
+   ACTION
+========================= */
 .action-cell {
   width: 150px;
   min-width: 150px;
@@ -442,7 +597,9 @@ th {
   background: #22c55e;
 }
 
-/* BADGE */
+/* =========================
+   BADGE
+========================= */
 .status-badge {
   display: inline-block;
   background: #22c55e;
@@ -454,7 +611,9 @@ th {
   white-space: nowrap;
 }
 
-/* DASHBOARD */
+/* =========================
+   DASHBOARD
+========================= */
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -478,47 +637,6 @@ th {
   font-weight: 700;
 }
 
-/* RESPONSIVE */
-@media (max-width: 1100px) {
-  .page {
-    grid-template-columns: 1fr;
-  }
-
-  .dashboard-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .sidebar {
-    width: 240px;
-  }
-
-  .adminPageShell__head {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .adminToolbar {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .adminToolbar__left,
-  .adminToolbar__right {
-    width: 100%;
-  }
-}
-
-.createForm {
-  max-width: 720px;
-}
-
-.createForm__actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 16px;
-}
-
-/* DASHBOARD PAGE */
 .dashboardPage {
   width: 100%;
 }
@@ -658,7 +776,74 @@ th {
   border-bottom: 1px solid #e5e7eb;
 }
 
+.createForm {
+  max-width: 720px;
+}
+
+.createForm__actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
 @media (max-width: 1100px) {
+  .page {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .sidebar {
+    width: 240px;
+  }
+
+  .main {
+    margin-left: 240px;
+    width: calc(100% - 240px);
+  }
+
+  .topbar {
+    left: 240px;
+    width: calc(100% - 240px);
+    padding: 0 16px;
+  }
+
+  .topbar__right {
+    gap: 10px;
+  }
+
+  .profileInline {
+    padding: 6px 10px;
+  }
+
+  .profileBox__name {
+    font-size: 13px;
+  }
+
+  .profileBox__role {
+    font-size: 11px;
+  }
+
+  .adminPageShell__head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .adminToolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .adminToolbar__left,
+  .adminToolbar__right {
+    width: 100%;
+  }
+
   .dashboardHead {
     flex-direction: column;
     align-items: flex-start;

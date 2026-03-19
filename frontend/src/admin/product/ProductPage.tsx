@@ -1,7 +1,17 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AdminPageShell from "../shared/AdminPageShell";
 import AdminTable from "../shared/AdminTable";
+import {
+  getProducts,
+  softDeleteProduct,
+  toggleProductStatus,
+} from "./productStorage";
 
 export default function ProductPage() {
+  const navigate = useNavigate();
+  const [refresh, setRefresh] = useState(0);
+
   const columns = [
     { key: "id", label: "#" },
     { key: "image", label: "Hình" },
@@ -15,32 +25,32 @@ export default function ProductPage() {
     { key: "realId", label: "ID" },
   ];
 
-  const rows = [
-    {
-      id: 1,
-      image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=300&auto=format&fit=crop",
-      name: "Test sửa sản phẩm",
-      category: "Khai vị",
-      brand: "Món Việt",
-      price: "78.000 VND",
-      salePrice: "46.000 VND",
-      stock: 40,
-      type: "",
-      realId: 51,
-    },
-    {
-      id: 2,
-      image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=300&auto=format&fit=crop",
-      name: "Salad rau mùa sốt cam",
-      category: "Khai vị",
-      brand: "Món Việt",
-      price: "82.390 VND",
-      salePrice: "68.000 VND",
-      stock: 76,
-      type: "Sản phẩm mới",
-      realId: 1,
-    },
-  ];
+  const rows = getProducts()
+    .filter((item) => !item.deleted)
+    .map((item) => ({
+      ...item,
+      type: item.type || "",
+    }));
+
+  const handleToggleStatus = (id: number) => {
+    toggleProductStatus(id);
+    setRefresh((prev) => prev + 1);
+  };
+
+  const handleView = (id: number) => {
+    navigate(`/admin/product/view/${id}`);
+  };
+
+  const handleEdit = (id: number) => {
+    navigate(`/admin/product/edit/${id}`);
+  };
+
+  const handleDelete = (id: number) => {
+    const ok = window.confirm("Bạn có chắc muốn xóa sản phẩm này?");
+    if (!ok) return;
+    softDeleteProduct(id);
+    setRefresh((prev) => prev + 1);
+  };
 
   return (
     <AdminPageShell
@@ -53,7 +63,15 @@ export default function ProductPage() {
       ]}
       addLink="/admin/product/create"
     >
-      <AdminTable columns={columns} rows={rows} />
+      <AdminTable
+        key={refresh}
+        columns={columns}
+        rows={rows}
+        onView={handleView}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onToggleStatus={handleToggleStatus}
+      />
     </AdminPageShell>
   );
 }

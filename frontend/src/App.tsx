@@ -35,6 +35,10 @@ import ReviewCreatePage from "./admin/review/ReviewCreatePage";
 import AuthPage from "./admin/auth/AuthPage";
 import AuthCreatePage from "./admin/auth/AuthCreatePage";
 
+import ProductEditPage from "./admin/product/ProductEditPage";
+import ProductViewPage from "./admin/product/ProductViewPage";
+import ProductTrashPage from "./admin/product/ProductTrashPage";
+
 function App() {
   return (
     <BrowserRouter>
@@ -73,6 +77,10 @@ function App() {
           <Route path="review/create" element={<ReviewCreatePage />} />
           <Route path="auth" element={<AuthPage />} />
           <Route path="auth/create" element={<AuthCreatePage />} />
+
+          <Route path="product/edit/:id" element={<ProductEditPage />} />
+          <Route path="product/view/:id" element={<ProductViewPage />} />
+          <Route path="product/trash" element={<ProductTrashPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

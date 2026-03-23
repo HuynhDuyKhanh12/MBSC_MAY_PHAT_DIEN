@@ -1,0 +1,208 @@
+.repairPage {
+  background: #f6f8fb;
+  min-height: 100vh;
+}
+
+.repairContainer {
+  width: min(1200px, calc(100% - 32px));
+  margin: 0 auto;
+}
+
+.repairHero {
+  background: linear-gradient(135deg, #0f172a 0%, #0f4c9a 100%);
+  color: #fff;
+  padding: 60px 0;
+}
+
+.repairHero__content {
+  max-width: 700px;
+}
+
+.repairHero__badge {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.repairHero__title {
+  margin: 0 0 14px;
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.repairHero__desc {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.repairSection {
+  padding: 40px 0 60px;
+}
+
+.repairGrid {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.repairInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.repairInfo__title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.repairInfo__card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+.repairInfo__card h3 {
+  margin: 0 0 14px;
+  font-size: 18px;
+  color: #0f172a;
+}
+
+.repairInfo__card ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #475569;
+  line-height: 1.8;
+}
+
+.repairInfo__contact {
+  background: #fff;
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  color: #334155;
+  line-height: 1.9;
+}
+
+.repairFormWrap {
+  background: #fff;
+  border-radius: 22px;
+  padding: 28px;
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
+}
+
+.repairForm__title {
+  margin: 0 0 22px;
+  font-size: 30px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.repairForm__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+.repairField {
+  display: flex;
+  flex-direction: column;
+}
+
+.repairField--full {
+  grid-column: 1 / -1;
+}
+
+.repairField label {
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.repairField input,
+.repairField select,
+.repairField textarea {
+  width: 100%;
+  border: 1px solid #dbe3ee;
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 15px;
+  outline: none;
+  transition: 0.2s ease;
+  color: #0f172a;
+}
+
+.repairField input:focus,
+.repairField select:focus,
+.repairField textarea:focus {
+  border-color: #0f4c9a;
+  box-shadow: 0 0 0 4px rgba(15, 76, 154, 0.08);
+}
+
+.repairField textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.repairSubmit {
+  margin-top: 24px;
+  width: 100%;
+  height: 54px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #0f4c9a 0%, #0c67d7 100%);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.repairSubmit:hover {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 992px) {
+  .repairGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .repairForm__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .repairHero__title {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 576px) {
+  .repairHero {
+    padding: 42px 0;
+  }
+
+  .repairHero__title {
+    font-size: 26px;
+  }
+
+  .repairFormWrap {
+    padding: 18px;
+  }
+
+  .repairForm__title {
+    font-size: 24px;
+  }
+}

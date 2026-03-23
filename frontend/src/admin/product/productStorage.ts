@@ -111,3 +111,14 @@ export function restoreProduct(id: number) {
   );
   saveProducts(products);
 }
+
+
+export function deleteProductForever(id: number) {
+  const products = getProducts().filter((item) => item.id !== id);
+  saveProducts(products);
+}
+
+export function clearProductTrash() {
+  const products = getProducts().filter((item) => !item.deleted);
+  saveProducts(products);
+}

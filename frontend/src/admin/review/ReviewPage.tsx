@@ -1,7 +1,17 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AdminPageShell from "../shared/AdminPageShell";
-import AdminTable from "../shared/AdminTable";
+import ReviewTable from "./ReviewTable";
+import {
+  getReviews,
+  softDeleteReview,
+  toggleReviewStatus,
+} from "./reviewStorage";
 
 export default function ReviewPage() {
+  const navigate = useNavigate();
+  const [refresh, setRefresh] = useState(0);
+
   const columns = [
     { key: "id", label: "#" },
     { key: "userId", label: "User ID" },
@@ -10,15 +20,24 @@ export default function ReviewPage() {
     { key: "comment", label: "Bình luận" },
   ];
 
-  const rows = [
-    {
-      id: 1,
-      userId: 1,
-      productId: 2,
-      rating: 5,
-      comment: "Rất tốt",
-    },
-  ];
+  const rows = getReviews().filter((item) => !item.deleted);
+
+  const handleToggleStatus = (id: number) => {
+    toggleReviewStatus(id);
+    setRefresh((prev) => prev + 1);
+  };
+
+  const handleView = (id: number) => {
+    navigate(`/admin/review/view/${id}`);
+  };
+
+  const handleDelete = (id: number) => {
+    const ok = window.confirm("Bạn có chắc muốn xóa đánh giá này?");
+    if (!ok) return;
+
+    softDeleteReview(id);
+    setRefresh((prev) => prev + 1);
+  };
 
   return (
     <AdminPageShell
@@ -26,8 +45,16 @@ export default function ReviewPage() {
       breadcrumb="Review"
       searchPlaceholder="Tìm kiếm đánh giá..."
       addLink="/admin/review/create"
+      trashLink="/admin/review/trash"
     >
-      <AdminTable columns={columns} rows={rows} />
+      <ReviewTable
+        key={refresh}
+        columns={columns}
+        rows={rows}
+        onView={handleView}
+        onDelete={handleDelete}
+        onToggleStatus={handleToggleStatus}
+      />
     </AdminPageShell>
   );
 }

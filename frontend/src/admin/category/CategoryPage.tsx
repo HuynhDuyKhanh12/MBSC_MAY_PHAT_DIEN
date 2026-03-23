@@ -1,7 +1,17 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AdminPageShell from "../shared/AdminPageShell";
 import AdminTable from "../shared/AdminTable";
+import {
+  getCategories,
+  softDeleteCategory,
+  toggleCategoryStatus,
+} from "./categoryStorage";
 
 export default function CategoryPage() {
+  const navigate = useNavigate();
+  const [refresh, setRefresh] = useState(0);
+
   const columns = [
     { key: "id", label: "#" },
     { key: "image", label: "Hình" },
@@ -11,16 +21,27 @@ export default function CategoryPage() {
     { key: "realId", label: "ID" },
   ];
 
-  const rows = [
-    {
-      id: 1,
-      image: "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=300&auto=format&fit=crop",
-      name: "Khai vị",
-      slug: "khai-vi",
-      description: "Món ăn của khai vị",
-      realId: 1,
-    },
-  ];
+  const rows = getCategories().filter((item) => !item.deleted);
+
+  const handleToggleStatus = (id: number) => {
+    toggleCategoryStatus(id);
+    setRefresh((prev) => prev + 1);
+  };
+
+  const handleView = (id: number) => {
+    navigate(`/admin/category/view/${id}`);
+  };
+
+  const handleEdit = (id: number) => {
+    navigate(`/admin/category/edit/${id}`);
+  };
+
+  const handleDelete = (id: number) => {
+    const ok = window.confirm("Bạn có chắc muốn xóa danh mục này?");
+    if (!ok) return;
+    softDeleteCategory(id);
+    setRefresh((prev) => prev + 1);
+  };
 
   return (
     <AdminPageShell
@@ -28,8 +49,17 @@ export default function CategoryPage() {
       breadcrumb="Danh mục"
       searchPlaceholder="Tìm kiếm danh mục..."
       addLink="/admin/category/create"
+      trashLink="/admin/category/trash"
     >
-      <AdminTable columns={columns} rows={rows} />
+      <AdminTable
+        key={refresh}
+        columns={columns}
+        rows={rows}
+        onView={handleView}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onToggleStatus={handleToggleStatus}
+      />
     </AdminPageShell>
   );
 }

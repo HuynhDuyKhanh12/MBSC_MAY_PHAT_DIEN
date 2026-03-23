@@ -9,6 +9,8 @@ import BlogDetail from "./pages/Blog/BlogDetail";
 import RepairRegister from "./pages/RepairRegister/RepairRegister";
 import Promotions from "./pages/Promotions/Promotions";
 import ProductDetail from "./pages/ProductDetail/ProductDetail";
+import Repair from "./pages/Repair/Repair";
+import Auth from "./pages/Auth/Auth";
 
 import AdminLayout from "./admin/layout/AdminLayout";
 import DashboardPage from "./admin/dashboard/DashboardPage";
@@ -34,11 +36,26 @@ import ReviewPage from "./admin/review/ReviewPage";
 import ReviewCreatePage from "./admin/review/ReviewCreatePage";
 import AuthPage from "./admin/auth/AuthPage";
 import AuthCreatePage from "./admin/auth/AuthCreatePage";
+import AdminLogin from "./admin/AdminLogin";
 
 import ProductEditPage from "./admin/product/ProductEditPage";
 import ProductViewPage from "./admin/product/ProductViewPage";
 import ProductTrashPage from "./admin/product/ProductTrashPage";
 
+import CategoryTrashPage from "./admin/category/CategoryTrashPage";
+import CategoryViewPage from "./admin/category/CategoryViewPage";
+import CategoryEditPage from "./admin/category/CategoryEditPage";
+
+import BrandEditPage from "./admin/brand/BrandEditPage";
+import BrandViewPage from "./admin/brand/BrandViewPage";
+import BrandTrashPage from "./admin/brand/BrandTrashPage";
+
+import ReviewViewPage from "./admin/review/ReviewViewPage";
+import ReviewTrashPage from "./admin/review/ReviewTrashPage";
+
+import AuthViewPage from "./admin/auth/AuthViewPage";
+import AuthEditPage from "./admin/auth/AuthEditPage";
+import AuthTrashPage from "./admin/auth/AuthTrashPage";
 function App() {
   return (
     <BrowserRouter>
@@ -52,9 +69,12 @@ function App() {
         <Route path="blog" element={<Blog />} />
         <Route path="blog/:id" element={<BlogDetail />} />
         <Route path="repair" element={<RepairRegister />} />
+        <Route path="/repair" element={<Repair />} />
+        <Route path="/auth" element={<Auth />} />
 
-        <Route path="/admin" element={<AdminLayout />}>
+        <Route path="/admin" element={<AdminLayout />}  >
           <Route index element={<DashboardPage />} />
+          <Route path="login" element={<AdminLogin />} />
           <Route path="product" element={<ProductPage />} />
           <Route path="product/create" element={<ProductCreatePage />} />
           <Route path="category" element={<CategoryPage />} />
@@ -81,6 +101,21 @@ function App() {
           <Route path="product/edit/:id" element={<ProductEditPage />} />
           <Route path="product/view/:id" element={<ProductViewPage />} />
           <Route path="product/trash" element={<ProductTrashPage />} />
+
+          <Route path="category/edit/:id" element={<CategoryEditPage />} />
+          <Route path="category/view/:id" element={<CategoryViewPage />} />
+          <Route path="category/trash" element={<CategoryTrashPage />} />
+
+          <Route path="brand/edit/:id" element={<BrandEditPage />} />
+          <Route path="brand/view/:id" element={<BrandViewPage />} />
+          <Route path="brand/trash" element={<BrandTrashPage />} />
+
+          <Route path="review/view/:id" element={<ReviewViewPage />} />
+          <Route path="review/trash" element={<ReviewTrashPage />} />
+
+          <Route path="auth/view/:id" element={<AuthViewPage />} />
+          <Route path="auth/edit/:id" element={<AuthEditPage />} />
+          <Route path="auth/trash" element={<AuthTrashPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

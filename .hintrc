@@ -16,17 +16,8 @@
     "axe/aria": [
       "default",
       {
-        "aria-required-children": "off"
-      }
-    ],
-    "compat-api/css": [
-      "default",
-      {
-        "ignore": [
-          "-webkit-overflow-scrolling",
-          "scrollbar-width",
-          "scrollbar-width: none"
-        ]
+        "aria-required-children": "off",
+        "aria-valid-attr-value": "off"
       }
     ],
     "compat-api/css": [

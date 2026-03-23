@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  getProducts,
-  restoreProduct,
-  deleteProductForever,
-  clearProductTrash,
-  type ProductItem,
-} from "./productStorage";
+  getReviews,
+  restoreReview,
+  deleteReviewForever,
+  clearReviewTrash,
+  type ReviewItem,
+} from "./reviewStorage";
 
-export default function ProductTrashPage() {
+export default function ReviewTrashPage() {
   const navigate = useNavigate();
-  const [rows, setRows] = useState<ProductItem[]>([]);
+  const [rows, setRows] = useState<ReviewItem[]>([]);
 
   const loadTrash = () => {
-    setRows(getProducts().filter((item) => item.deleted));
+    setRows(getReviews().filter((item) => item.deleted));
   };
 
   useEffect(() => {
@@ -21,30 +21,30 @@ export default function ProductTrashPage() {
   }, []);
 
   const handleRestore = (id: number) => {
-    restoreProduct(id);
+    restoreReview(id);
     loadTrash();
   };
 
   const handleDeleteForever = (id: number) => {
-    const ok = window.confirm("Bạn có chắc muốn xóa vĩnh viễn sản phẩm này?");
+    const ok = window.confirm("Bạn có chắc muốn xóa vĩnh viễn đánh giá này?");
     if (!ok) return;
-    deleteProductForever(id);
+    deleteReviewForever(id);
     loadTrash();
   };
 
   const handleClearTrash = () => {
-    const ok = window.confirm("Bạn có chắc muốn xóa tất cả sản phẩm trong thùng rác?");
+    const ok = window.confirm("Bạn có chắc muốn xóa tất cả đánh giá trong thùng rác?");
     if (!ok) return;
-    clearProductTrash();
+    clearReviewTrash();
     loadTrash();
   };
 
   return (
     <div style={{ padding: 20 }}>
-      <h2>Thùng rác sản phẩm</h2>
+      <h2>Thùng rác đánh giá</h2>
 
       <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-        <button onClick={() => navigate("/admin/product")}>
+        <button onClick={() => navigate("/admin/review")}>
           Quay lại
         </button>
 
@@ -67,10 +67,10 @@ export default function ProductTrashPage() {
         <thead>
           <tr>
             <th>#</th>
-            <th>Hình</th>
-            <th>Tên sản phẩm</th>
-            <th>Danh mục</th>
-            <th>Thương hiệu</th>
+            <th>User ID</th>
+            <th>Product ID</th>
+            <th>Số sao</th>
+            <th>Bình luận</th>
             <th>Khôi phục</th>
             <th>Xóa khỏi thùng rác</th>
           </tr>
@@ -80,16 +80,10 @@ export default function ProductTrashPage() {
             rows.map((item) => (
               <tr key={item.id}>
                 <td>{item.id}</td>
-                <td>
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    style={{ width: 70, height: 70, objectFit: "cover" }}
-                  />
-                </td>
-                <td>{item.name}</td>
-                <td>{item.category}</td>
-                <td>{item.brand}</td>
+                <td>{item.userId}</td>
+                <td>{item.productId}</td>
+                <td>{item.rating}</td>
+                <td>{item.comment}</td>
                 <td>
                   <button onClick={() => handleRestore(item.id)}>
                     Khôi phục
@@ -114,7 +108,7 @@ export default function ProductTrashPage() {
             ))
           ) : (
             <tr>
-              <td colSpan={7}>Không có sản phẩm nào trong thùng rác</td>
+              <td colSpan={7}>Không có đánh giá nào trong thùng rác</td>
             </tr>
           )}
         </tbody>

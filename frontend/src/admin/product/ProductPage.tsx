@@ -62,6 +62,7 @@ export default function ProductPage() {
         { label: "Thương hiệu", options: ["Món Việt", "Món Âu"] },
       ]}
       addLink="/admin/product/create"
+      trashLink="/admin/product/trash"
     >
       <AdminTable
         key={refresh}

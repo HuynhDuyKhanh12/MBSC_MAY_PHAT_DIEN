@@ -1,5 +1,5 @@
-import { NavLink, Outlet } from "react-router-dom";
-import { useState } from "react";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import {
   FaLock,
   FaClipboardList,
@@ -9,13 +9,61 @@ import {
   FaTachometerAlt,
   FaChevronDown,
   FaChevronRight,
+  FaSignOutAlt,
+  FaUserCircle,
+  FaSignInAlt,
 } from "react-icons/fa";
 import "./admin.css";
+
+type AdminUser = {
+  name: string;
+  avatar?: string;
+};
 
 export default function AdminLayout() {
   const [openProduct, setOpenProduct] = useState(false);
   const [openOrder, setOpenOrder] = useState(false);
   const [openCustomer, setOpenCustomer] = useState(false);
+
+  const [adminUser, setAdminUser] = useState<AdminUser | null>(() => {
+    const storedUser = localStorage.getItem("adminUser");
+    if (!storedUser) return null;
+
+    try {
+      return JSON.parse(storedUser);
+    } catch {
+      return null;
+    }
+  });
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("adminUser");
+
+    if (!storedUser) {
+      setAdminUser(null);
+      return;
+    }
+
+    try {
+      setAdminUser(JSON.parse(storedUser));
+    } catch {
+      setAdminUser(null);
+    }
+  }, [location.pathname]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("adminUser");
+    setAdminUser(null);
+    navigate("/admin/login");
+  };
+
+  const goToLogin = () => {
+    navigate("/admin/login");
+  };
 
   return (
     <div className="admin">
@@ -137,7 +185,39 @@ export default function AdminLayout() {
 
       <div className="main">
         <header className="topbar">
-          <h3>Admin</h3>
+          <h3 className="topbar__title">Admin</h3>
+
+          <div className="topbar__right">
+            {adminUser && (
+              <div className="profileInline">
+                {adminUser.avatar ? (
+                  <img
+                    src={adminUser.avatar}
+                    alt={adminUser.name}
+                    className="profileBox__avatar"
+                  />
+                ) : (
+                  <div className="profileBox__avatar profileBox__avatar--icon">
+                    <FaUserCircle />
+                  </div>
+                )}
+
+                <div className="profileBox__info">
+                  <span className="profileBox__name">{adminUser.name}</span>
+                  <span className="profileBox__role">Quản trị viên</span>
+                </div>
+              </div>
+            )}
+
+            <button
+              type="button"
+              className={`loginBtn ${adminUser ? "loginBtn--logout" : ""}`}
+              onClick={adminUser ? handleLogout : goToLogin}
+            >
+              {adminUser ? <FaSignOutAlt /> : <FaSignInAlt />}
+              {adminUser ? "Đăng xuất" : "Đăng nhập"}
+            </button>
+          </div>
         </header>
 
         <main className="content">

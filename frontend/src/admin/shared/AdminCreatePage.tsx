@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import type { FormField } from "./types";
 
@@ -7,6 +8,8 @@ type Props = {
   backLink: string;
   submitText: string;
   fields: FormField[];
+  onSubmit?: (formData: any) => void;
+  initialValues?: Record<string, any>;
 };
 
 export default function AdminCreatePage({
@@ -15,7 +18,46 @@ export default function AdminCreatePage({
   backLink,
   submitText,
   fields,
+  onSubmit,
+  initialValues,
 }: Props) {
+  const [formData, setFormData] = useState<Record<string, any>>(initialValues || {});
+
+  useEffect(() => {
+    setFormData(initialValues || {});
+  }, [initialValues]);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type } = e.target as HTMLInputElement;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "number" ? value : value,
+    }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormData((prev) => ({
+        ...prev,
+        [fieldName]: file,
+        imagePreview: reader.result,
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit?.(formData);
+  };
+
   return (
     <div className="adminPageShell">
       <div className="adminPageShell__head">
@@ -30,15 +72,25 @@ export default function AdminCreatePage({
 
       <section className="adminPanel">
         <div className="adminPanel__body">
-          <div className="createForm">
+          <form className="createForm" onSubmit={handleSubmit}>
             {fields.map((field) => (
               <div className="form-group" key={field.name}>
-                <label>{field.label}</label>
+                <label htmlFor={field.name}>{field.label}</label>
 
                 {field.type === "textarea" ? (
-                  <textarea />
+                  <textarea
+                    id={field.name}
+                    name={field.name}
+                    value={formData[field.name] || ""}
+                    onChange={handleChange}
+                  />
                 ) : field.type === "select" ? (
-                  <select>
+                  <select
+                    id={field.name}
+                    name={field.name}
+                    value={formData[field.name] || ""}
+                    onChange={handleChange}
+                  >
                     <option value="">Chọn</option>
                     {field.options?.map((opt) => (
                       <option key={opt} value={opt}>
@@ -47,15 +99,43 @@ export default function AdminCreatePage({
                     ))}
                   </select>
                 ) : field.type === "file" ? (
-                  <input type="file" accept="image/*" />
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    <input
+                      id={field.name}
+                      name={field.name}
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFileChange(e, field.name)}
+                    />
+
+                    {(formData.imagePreview || formData.image) && (
+                      <img
+                        src={formData.imagePreview || formData.image}
+                        alt="preview"
+                        style={{
+                          width: 120,
+                          height: 120,
+                          objectFit: "cover",
+                          borderRadius: 8,
+                          border: "1px solid #ddd",
+                        }}
+                      />
+                    )}
+                  </div>
                 ) : (
-                  <input type={field.type || "text"} />
+                  <input
+                    id={field.name}
+                    name={field.name}
+                    type={field.type || "text"}
+                    value={formData[field.name] || ""}
+                    onChange={handleChange}
+                  />
                 )}
               </div>
             ))}
 
             <div className="createForm__actions">
-              <button className="adminBtn adminBtn--green" type="button">
+              <button className="adminBtn adminBtn--green" type="submit">
                 {submitText}
               </button>
 
@@ -63,7 +143,7 @@ export default function AdminCreatePage({
                 Quay lại
               </Link>
             </div>
-          </div>
+          </form>
         </div>
       </section>
     </div>

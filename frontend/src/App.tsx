@@ -39,6 +39,21 @@ import ProductEditPage from "./admin/product/ProductEditPage";
 import ProductViewPage from "./admin/product/ProductViewPage";
 import ProductTrashPage from "./admin/product/ProductTrashPage";
 
+import CategoryTrashPage from "./admin/category/CategoryTrashPage";
+import CategoryViewPage from "./admin/category/CategoryViewPage";
+import CategoryEditPage from "./admin/category/CategoryEditPage";
+
+import BrandEditPage from "./admin/brand/BrandEditPage";
+import BrandViewPage from "./admin/brand/BrandViewPage";
+import BrandTrashPage from "./admin/brand/BrandTrashPage";
+
+import ReviewViewPage from "./admin/review/ReviewViewPage";
+import ReviewTrashPage from "./admin/review/ReviewTrashPage";
+
+import AuthViewPage from "./admin/auth/AuthViewPage";
+import AuthEditPage from "./admin/auth/AuthEditPage";
+import AuthTrashPage from "./admin/auth/AuthTrashPage";
+
 import UserEditPage from "./admin/user/UserEditPage";
 import UserViewPage from "./admin/user/UserViewPage";
 import UserTrashPage from "./admin/user/UserTrashPage";
@@ -102,6 +117,20 @@ function App() {
           <Route path="product/view/:id" element={<ProductViewPage />} />
           <Route path="product/trash" element={<ProductTrashPage />} />
 
+          <Route path="category/edit/:id" element={<CategoryEditPage />} />
+          <Route path="category/view/:id" element={<CategoryViewPage />} />
+          <Route path="category/trash" element={<CategoryTrashPage />} />
+
+          <Route path="brand/edit/:id" element={<BrandEditPage />} />
+          <Route path="brand/view/:id" element={<BrandViewPage />} />
+          <Route path="brand/trash" element={<BrandTrashPage />} />
+
+          <Route path="review/view/:id" element={<ReviewViewPage />} />
+          <Route path="review/trash" element={<ReviewTrashPage />} />
+
+          <Route path="auth/view/:id" element={<AuthViewPage />} />
+          <Route path="auth/edit/:id" element={<AuthEditPage />} />
+          <Route path="auth/trash" element={<AuthTrashPage />} />
           <Route path="/admin/user/edit/:id" element={<UserEditPage />} />
           <Route path="/admin/user/view/:id" element={<UserViewPage />} />
           <Route path="/admin/user/trash" element={<UserTrashPage />} />
@@ -121,6 +150,7 @@ function App() {
           <Route path="/admin/order" element={<OrderPage />} />
           <Route path="/admin/order/edit/:id" element={<OrderEditPage />} />
           <Route path="/admin/order/view/:id" element={<OrderViewPage />} />
+
         </Route>
       </Routes>
     </BrowserRouter>

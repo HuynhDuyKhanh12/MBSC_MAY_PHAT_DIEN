@@ -1,7 +1,18 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AdminPageShell from "../shared/AdminPageShell";
 import AdminTable from "../shared/AdminTable";
+import {
+  getUsers,
+  softDeleteUser,
+  toggleUserStatus,
+  type UserItem,
+} from "./userStorage";
 
 export default function UserPage() {
+  const navigate = useNavigate();
+  const [rows, setRows] = useState<UserItem[]>([]);
+
   const columns = [
     { key: "id", label: "#" },
     { key: "image", label: "Ảnh" },
@@ -12,17 +23,35 @@ export default function UserPage() {
     { key: "realId", label: "ID" },
   ];
 
-  const rows = [
-    {
-      id: 1,
-      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=300&auto=format&fit=crop",
-      name: "Khanh",
-      email: "khanh@gmail.com",
-      phone: "0911111111",
-      role: "admin",
-      realId: 1,
-    },
-  ];
+  const loadUsers = () => {
+    const data = getUsers().filter((item) => !item.deleted);
+    setRows(data);
+  };
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const handleView = (id: number) => {
+    navigate(`/admin/user/view/${id}`);
+  };
+
+  const handleEdit = (id: number) => {
+    navigate(`/admin/user/edit/${id}`);
+  };
+
+  const handleDelete = (id: number) => {
+    const ok = window.confirm("Bạn có chắc muốn xóa người dùng này?");
+    if (!ok) return;
+
+    softDeleteUser(id);
+    loadUsers();
+  };
+
+  const handleToggleStatus = (id: number) => {
+    toggleUserStatus(id);
+    loadUsers();
+  };
 
   return (
     <AdminPageShell
@@ -32,7 +61,18 @@ export default function UserPage() {
       filters={[{ label: "Vai trò", options: ["admin", "user"] }]}
       addLink="/admin/user/create"
     >
-      <AdminTable columns={columns} rows={rows} />
+      <div style={{ marginBottom: 16 }}>
+        <button onClick={() => navigate("/admin/user/trash")}>Thùng rác</button>
+      </div>
+
+      <AdminTable
+        columns={columns}
+        rows={rows}
+        onView={handleView}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onToggleStatus={handleToggleStatus}
+      />
     </AdminPageShell>
   );
 }

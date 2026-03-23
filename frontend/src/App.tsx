@@ -27,9 +27,6 @@ import AddressCreatePage from "./admin/address/AddressCreatePage";
 import WishlistPage from "./admin/wishlist/WishlistPage";
 import WishlistCreatePage from "./admin/wishlist/WishlistCreatePage";
 import CartPage from "./admin/cart/CartPage";
-import CartCreatePage from "./admin/cart/CartCreatePage";
-import OrderPage from "./admin/order/OrderPage";
-import OrderCreatePage from "./admin/order/OrderCreatePage";
 import CouponPage from "./admin/coupon/CouponPage";
 import CouponCreatePage from "./admin/coupon/CouponCreatePage";
 import ReviewPage from "./admin/review/ReviewPage";
@@ -56,6 +53,27 @@ import ReviewTrashPage from "./admin/review/ReviewTrashPage";
 import AuthViewPage from "./admin/auth/AuthViewPage";
 import AuthEditPage from "./admin/auth/AuthEditPage";
 import AuthTrashPage from "./admin/auth/AuthTrashPage";
+
+import UserEditPage from "./admin/user/UserEditPage";
+import UserViewPage from "./admin/user/UserViewPage";
+import UserTrashPage from "./admin/user/UserTrashPage";
+
+import AddressEditPage from "./admin/address/AddressEditPage";
+import AddressViewPage from "./admin/address/AddressViewPage";
+import AddressTrashPage from "./admin/address/AddressTrashPage";
+
+import WishlistEditPage from "./admin/wishlist/WishlistEditPage";
+import WishlistViewPage from "./admin/wishlist/WishlistViewPage";
+import WishlistTrashPage from "./admin/wishlist/WishlistTrashPage";
+
+import CouponEditPage from "./admin/coupon/CouponEditPage";
+import CouponViewPage from "./admin/coupon/CouponViewPage";
+import CouponTrashPage from "./admin/coupon/CouponTrashPage";
+
+import OrderPage from "./admin/order/OrderPage";
+import OrderEditPage from "./admin/order/OrderEditPage";
+import OrderViewPage from "./admin/order/OrderViewPage";
+
 function App() {
   return (
     <BrowserRouter>
@@ -88,9 +106,6 @@ function App() {
           <Route path="wishlist" element={<WishlistPage />} />
           <Route path="wishlist/create" element={<WishlistCreatePage />} />
           <Route path="cart" element={<CartPage />} />
-          <Route path="cart/create" element={<CartCreatePage />} />
-          <Route path="order" element={<OrderPage />} />
-          <Route path="order/create" element={<OrderCreatePage />} />
           <Route path="coupon" element={<CouponPage />} />
           <Route path="coupon/create" element={<CouponCreatePage />} />
           <Route path="review" element={<ReviewPage />} />
@@ -116,6 +131,26 @@ function App() {
           <Route path="auth/view/:id" element={<AuthViewPage />} />
           <Route path="auth/edit/:id" element={<AuthEditPage />} />
           <Route path="auth/trash" element={<AuthTrashPage />} />
+          <Route path="/admin/user/edit/:id" element={<UserEditPage />} />
+          <Route path="/admin/user/view/:id" element={<UserViewPage />} />
+          <Route path="/admin/user/trash" element={<UserTrashPage />} />
+
+          <Route path="/admin/address/edit/:id" element={<AddressEditPage />} />
+          <Route path="/admin/address/view/:id" element={<AddressViewPage />} />
+          <Route path="/admin/address/trash" element={<AddressTrashPage />} />
+
+          <Route path="/admin/wishlist/edit/:id" element={<WishlistEditPage />} />
+          <Route path="/admin/wishlist/view/:id" element={<WishlistViewPage />} />
+          <Route path="/admin/wishlist/trash" element={<WishlistTrashPage />} />
+
+          <Route path="/admin/coupon/edit/:id" element={<CouponEditPage />} />
+          <Route path="/admin/coupon/view/:id" element={<CouponViewPage />} />
+          <Route path="/admin/coupon/trash" element={<CouponTrashPage />} />
+
+          <Route path="/admin/order" element={<OrderPage />} />
+          <Route path="/admin/order/edit/:id" element={<OrderEditPage />} />
+          <Route path="/admin/order/view/:id" element={<OrderViewPage />} />
+
         </Route>
       </Routes>
     </BrowserRouter>

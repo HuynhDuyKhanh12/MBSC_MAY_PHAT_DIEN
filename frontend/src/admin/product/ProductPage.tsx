@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminPageShell from "../shared/AdminPageShell";
 import AdminTable from "../shared/AdminTable";
@@ -6,11 +6,12 @@ import {
   getProducts,
   softDeleteProduct,
   toggleProductStatus,
+  type ProductItem,
 } from "./productStorage";
 
 export default function ProductPage() {
   const navigate = useNavigate();
-  const [refresh, setRefresh] = useState(0);
+  const [rows, setRows] = useState<ProductItem[]>([]);
 
   const columns = [
     { key: "id", label: "#" },
@@ -25,16 +26,24 @@ export default function ProductPage() {
     { key: "realId", label: "ID" },
   ];
 
-  const rows = getProducts()
-    .filter((item) => !item.deleted)
-    .map((item) => ({
-      ...item,
-      type: item.type || "",
-    }));
+  const loadProducts = () => {
+    const data = getProducts()
+      .filter((item) => !item.deleted)
+      .map((item) => ({
+        ...item,
+        type: item.type || "",
+      }));
+
+    setRows(data);
+  };
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
 
   const handleToggleStatus = (id: number) => {
     toggleProductStatus(id);
-    setRefresh((prev) => prev + 1);
+    loadProducts();
   };
 
   const handleView = (id: number) => {
@@ -48,8 +57,9 @@ export default function ProductPage() {
   const handleDelete = (id: number) => {
     const ok = window.confirm("Bạn có chắc muốn xóa sản phẩm này?");
     if (!ok) return;
+
     softDeleteProduct(id);
-    setRefresh((prev) => prev + 1);
+    loadProducts();
   };
 
   return (
@@ -64,7 +74,6 @@ export default function ProductPage() {
       addLink="/admin/product/create"
     >
       <AdminTable
-        key={refresh}
         columns={columns}
         rows={rows}
         onView={handleView}

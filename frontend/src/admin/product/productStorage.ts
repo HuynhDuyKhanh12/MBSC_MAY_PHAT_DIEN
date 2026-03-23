@@ -51,13 +51,44 @@ const defaultProducts: ProductItem[] = [
   },
 ];
 
+function normalizeProducts(data: any): ProductItem[] {
+  if (!Array.isArray(data)) return defaultProducts;
+
+  return data.map((item, index) => ({
+    id: Number(item.id ?? index + 1),
+    image: item.image ?? "",
+    name: item.name ?? "",
+    category: item.category ?? "",
+    brand: item.brand ?? "",
+    price: item.price ?? "0 VND",
+    salePrice: item.salePrice ?? "0 VND",
+    stock: Number(item.stock ?? 0),
+    type: item.type ?? "",
+    realId: Number(item.realId ?? item.id ?? index + 1),
+    status: item.status ?? true,
+    deleted: item.deleted ?? false,
+    description: item.description ?? "",
+  }));
+}
+
 export function getProducts(): ProductItem[] {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+
+    if (!raw) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultProducts));
+      return defaultProducts;
+    }
+
+    const parsed = JSON.parse(raw);
+    const normalized = normalizeProducts(parsed);
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+    return normalized;
+  } catch {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultProducts));
     return defaultProducts;
   }
-  return JSON.parse(raw);
 }
 
 export function saveProducts(products: ProductItem[]) {
@@ -65,12 +96,17 @@ export function saveProducts(products: ProductItem[]) {
 }
 
 export function getProductById(id: number) {
-  return getProducts().find((item) => item.id === id);
+  const products = getProducts();
+  return products.find((item) => item.id === id || item.realId === id);
 }
 
 export function addProduct(product: Omit<ProductItem, "id" | "realId">) {
   const products = getProducts();
-  const nextId = products.length ? Math.max(...products.map((p) => p.id)) + 1 : 1;
+
+  const nextId = products.length
+    ? Math.max(...products.map((p) => p.id)) + 1
+    : 1;
+
   const nextRealId = products.length
     ? Math.max(...products.map((p) => p.realId)) + 1
     : 1;
@@ -86,28 +122,34 @@ export function addProduct(product: Omit<ProductItem, "id" | "realId">) {
 
 export function updateProduct(id: number, data: Partial<ProductItem>) {
   const products = getProducts().map((item) =>
-    item.id === id ? { ...item, ...data } : item
+    item.id === id || item.realId === id ? { ...item, ...data } : item
   );
   saveProducts(products);
 }
 
 export function toggleProductStatus(id: number) {
   const products = getProducts().map((item) =>
-    item.id === id ? { ...item, status: !item.status } : item
+    item.id === id || item.realId === id
+      ? { ...item, status: !item.status }
+      : item
   );
   saveProducts(products);
 }
 
 export function softDeleteProduct(id: number) {
   const products = getProducts().map((item) =>
-    item.id === id ? { ...item, deleted: true } : item
+    item.id === id || item.realId === id
+      ? { ...item, deleted: true }
+      : item
   );
   saveProducts(products);
 }
 
 export function restoreProduct(id: number) {
   const products = getProducts().map((item) =>
-    item.id === id ? { ...item, deleted: false } : item
+    item.id === id || item.realId === id
+      ? { ...item, deleted: false }
+      : item
   );
   saveProducts(products);
 }

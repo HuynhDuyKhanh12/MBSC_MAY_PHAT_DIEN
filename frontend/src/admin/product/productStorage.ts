@@ -64,7 +64,7 @@ function normalizeProducts(data: any): ProductItem[] {
     salePrice: item.salePrice ?? "0 VND",
     stock: Number(item.stock ?? 0),
     type: item.type ?? "",
-    realId: Number(item.realId ?? item.id ?? index + 1),
+    realId: Number(item.realId ?? index + 1),
     status: item.status ?? true,
     deleted: item.deleted ?? false,
     description: item.description ?? "",
@@ -95,9 +95,8 @@ export function saveProducts(products: ProductItem[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
 }
 
-export function getProductById(id: number) {
-  const products = getProducts();
-  return products.find((item) => item.id === id || item.realId === id);
+export function getProductById(realId: number) {
+  return getProducts().find((item) => item.realId === realId);
 }
 
 export function addProduct(product: Omit<ProductItem, "id" | "realId">) {
@@ -120,43 +119,36 @@ export function addProduct(product: Omit<ProductItem, "id" | "realId">) {
   saveProducts([newProduct, ...products]);
 }
 
-export function updateProduct(id: number, data: Partial<ProductItem>) {
+export function updateProduct(realId: number, data: Partial<ProductItem>) {
   const products = getProducts().map((item) =>
-    item.id === id || item.realId === id ? { ...item, ...data } : item
+    item.realId === realId ? { ...item, ...data } : item
   );
   saveProducts(products);
 }
 
-export function toggleProductStatus(id: number) {
+export function toggleProductStatus(realId: number) {
   const products = getProducts().map((item) =>
-    item.id === id || item.realId === id
-      ? { ...item, status: !item.status }
-      : item
+    item.realId === realId ? { ...item, status: !item.status } : item
   );
   saveProducts(products);
 }
 
-export function softDeleteProduct(id: number) {
+export function softDeleteProduct(realId: number) {
   const products = getProducts().map((item) =>
-    item.id === id || item.realId === id
-      ? { ...item, deleted: true }
-      : item
+    item.realId === realId ? { ...item, deleted: true } : item
   );
   saveProducts(products);
 }
 
-export function restoreProduct(id: number) {
+export function restoreProduct(realId: number) {
   const products = getProducts().map((item) =>
-    item.id === id || item.realId === id
-      ? { ...item, deleted: false }
-      : item
+    item.realId === realId ? { ...item, deleted: false } : item
   );
   saveProducts(products);
 }
 
-
-export function deleteProductForever(id: number) {
-  const products = getProducts().filter((item) => item.id !== id);
+export function deleteProductForever(realId: number) {
+  const products = getProducts().filter((item) => item.realId !== realId);
   saveProducts(products);
 }
 

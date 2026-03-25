@@ -131,3 +131,13 @@ export function restoreCoupon(id: number) {
   );
   saveCoupons(coupons);
 }
+
+export function deleteCouponForever(id: number) {
+  const coupons = getCoupons().filter((item) => item.id !== id);
+  saveCoupons(coupons);
+}
+
+export function clearCouponTrash() {
+  const coupons = getCoupons().filter((item) => !item.deleted);
+  saveCoupons(coupons);
+}

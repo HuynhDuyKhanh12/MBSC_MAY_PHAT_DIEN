@@ -129,3 +129,13 @@ export function restoreWishlist(id: number) {
 
   saveWishlists(wishlists);
 }
+
+export function deleteWishlistForever(id: number) {
+  const list = getWishlists().filter((item) => item.id !== id);
+  saveWishlists(list);
+}
+
+export function clearWishlistTrash() {
+  const list = getWishlists().filter((item) => !item.deleted);
+  saveWishlists(list);
+}

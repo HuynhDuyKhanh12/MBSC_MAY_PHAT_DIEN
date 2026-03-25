@@ -20,15 +20,15 @@ export default function ProductTrashPage() {
     loadTrash();
   }, []);
 
-  const handleRestore = (id: number) => {
-    restoreProduct(id);
+  const handleRestore = (realId: number) => {
+    restoreProduct(realId);
     loadTrash();
   };
 
-  const handleDeleteForever = (id: number) => {
+  const handleDeleteForever = (realId: number) => {
     const ok = window.confirm("Bạn có chắc muốn xóa vĩnh viễn sản phẩm này?");
     if (!ok) return;
-    deleteProductForever(id);
+    deleteProductForever(realId);
     loadTrash();
   };
 
@@ -78,7 +78,7 @@ export default function ProductTrashPage() {
         <tbody>
           {rows.length > 0 ? (
             rows.map((item) => (
-              <tr key={item.id}>
+              <tr key={item.realId}>
                 <td>{item.id}</td>
                 <td>
                   <img
@@ -91,13 +91,13 @@ export default function ProductTrashPage() {
                 <td>{item.category}</td>
                 <td>{item.brand}</td>
                 <td>
-                  <button onClick={() => handleRestore(item.id)}>
+                  <button onClick={() => handleRestore(item.realId)}>
                     Khôi phục
                   </button>
                 </td>
                 <td>
                   <button
-                    onClick={() => handleDeleteForever(item.id)}
+                    onClick={() => handleDeleteForever(item.realId)}
                     style={{
                       background: "#ef4444",
                       color: "#fff",

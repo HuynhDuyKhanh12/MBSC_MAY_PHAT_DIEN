@@ -58,13 +58,8 @@ export default function AddressPage() {
       breadcrumb="Address"
       searchPlaceholder="Tìm kiếm địa chỉ..."
       addLink="/admin/address/create"
+      trashLink="/admin/address/trash"
     >
-      <div style={{ marginBottom: 16 }}>
-        <button onClick={() => navigate("/admin/address/trash")}>
-          Thùng rác
-        </button>
-      </div>
-
       <AdminTable
         columns={columns}
         rows={rows}

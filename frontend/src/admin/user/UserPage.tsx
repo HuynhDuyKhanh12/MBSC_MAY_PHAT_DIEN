@@ -60,11 +60,8 @@ export default function UserPage() {
       searchPlaceholder="Tìm kiếm người dùng..."
       filters={[{ label: "Vai trò", options: ["admin", "user"] }]}
       addLink="/admin/user/create"
+      trashLink="/admin/user/trash"
     >
-      <div style={{ marginBottom: 16 }}>
-        <button onClick={() => navigate("/admin/user/trash")}>Thùng rác</button>
-      </div>
-
       <AdminTable
         columns={columns}
         rows={rows}

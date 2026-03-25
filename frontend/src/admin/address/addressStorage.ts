@@ -135,3 +135,13 @@ export function restoreAddress(id: number) {
 
   saveAddresses(addresses);
 }
+
+export function deleteAddressForever(id: number) {
+  const addresses = getAddresses().filter((item) => item.id !== id);
+  saveAddresses(addresses);
+}
+
+export function clearAddressTrash() {
+  const addresses = getAddresses().filter((item) => !item.deleted);
+  saveAddresses(addresses);
+}

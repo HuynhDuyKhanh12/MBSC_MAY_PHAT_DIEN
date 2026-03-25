@@ -54,7 +54,7 @@ export default function ProductViewPage() {
 
           <div style={{ marginTop: 20, display: "flex", gap: 10 }}>
             <button onClick={() => navigate("/admin/product")}>Quay lại</button>
-            <button onClick={() => navigate(`/admin/product/edit/${product.id}`)}>
+            <button onClick={() => navigate(`/admin/product/edit/${product.realId}`)}>
               Sửa sản phẩm
             </button>
           </div>

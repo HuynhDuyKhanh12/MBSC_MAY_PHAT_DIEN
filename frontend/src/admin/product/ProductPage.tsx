@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminPageShell from "../shared/AdminPageShell";
-import AdminTable from "../shared/AdminTable";
+import ProductTable from "./ProductTable";
 import {
   getProducts,
   softDeleteProduct,
@@ -41,24 +41,24 @@ export default function ProductPage() {
     loadProducts();
   }, []);
 
-  const handleToggleStatus = (id: number) => {
-    toggleProductStatus(id);
+  const handleToggleStatus = (realId: number) => {
+    toggleProductStatus(realId);
     loadProducts();
   };
 
-  const handleView = (id: number) => {
-    navigate(`/admin/product/view/${id}`);
+  const handleView = (realId: number) => {
+    navigate(`/admin/product/view/${realId}`);
   };
 
-  const handleEdit = (id: number) => {
-    navigate(`/admin/product/edit/${id}`);
+  const handleEdit = (realId: number) => {
+    navigate(`/admin/product/edit/${realId}`);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (realId: number) => {
     const ok = window.confirm("Bạn có chắc muốn xóa sản phẩm này?");
     if (!ok) return;
 
-    softDeleteProduct(id);
+    softDeleteProduct(realId);
     loadProducts();
   };
 
@@ -74,7 +74,7 @@ export default function ProductPage() {
       addLink="/admin/product/create"
       trashLink="/admin/product/trash"
     >
-      <AdminTable
+      <ProductTable
         columns={columns}
         rows={rows}
         onView={handleView}

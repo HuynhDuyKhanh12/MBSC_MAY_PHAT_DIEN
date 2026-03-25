@@ -138,3 +138,13 @@ export function restoreUser(id: number) {
 
   saveUsers(users);
 }
+
+export function deleteUserForever(id: number) {
+  const users = getUsers().filter((item) => item.id !== id);
+  saveUsers(users);
+}
+
+export function clearUserTrash() {
+  const users = getUsers().filter((item) => !item.deleted);
+  saveUsers(users);
+}

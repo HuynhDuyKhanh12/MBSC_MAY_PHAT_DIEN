@@ -59,15 +59,12 @@ export default function CouponPage() {
 
   return (
     <AdminPageShell
-      title="Quản lý mã giảm giá"
-      breadcrumb="Coupon"
-      searchPlaceholder="Tìm kiếm coupon..."
-      addLink="/admin/coupon/create"
-    >
-      <div style={{ marginBottom: 16 }}>
-        <button onClick={() => navigate("/admin/coupon/trash")}>Thùng rác</button>
-      </div>
-
+  title="Quản lý coupon"
+  breadcrumb="Coupon"
+  searchPlaceholder="Tìm kiếm coupon..."
+  addLink="/admin/coupon/create"
+  trashLink="/admin/coupon/trash"
+  >
       <AdminTable
         columns={columns}
         rows={rows}

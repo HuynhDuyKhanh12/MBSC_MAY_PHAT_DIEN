@@ -56,13 +56,8 @@ export default function WishlistPage() {
       breadcrumb="Wishlist"
       searchPlaceholder="Tìm kiếm wishlist..."
       addLink="/admin/wishlist/create"
+      trashLink="/admin/wishlist/trash"
     >
-      <div style={{ marginBottom: 16 }}>
-        <button onClick={() => navigate("/admin/wishlist/trash")}>
-          Thùng rác
-        </button>
-      </div>
-
       <AdminTable
         columns={columns}
         rows={rows}

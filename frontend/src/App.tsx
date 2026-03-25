@@ -74,6 +74,12 @@ import OrderPage from "./admin/order/OrderPage";
 import OrderEditPage from "./admin/order/OrderEditPage";
 import OrderViewPage from "./admin/order/OrderViewPage";
 
+import ServiceDashboardPage from "./admin/service/ServiceDashboardPage";
+import MaintenancePage from "./admin/service/MaintenancePage";
+import RepairPage from "./admin/service/RepairPage";
+import WarrantyPage from "./admin/service/WarrantyPage";
+import ServiceTrashPage from "./admin/service/ServiceTrashPage";
+
 function App() {
   return (
     <BrowserRouter>
@@ -150,6 +156,12 @@ function App() {
           <Route path="/admin/order" element={<OrderPage />} />
           <Route path="/admin/order/edit/:id" element={<OrderEditPage />} />
           <Route path="/admin/order/view/:id" element={<OrderViewPage />} />
+
+          <Route path="/admin/service" element={<ServiceDashboardPage />} />
+          <Route path="/admin/service/maintenance" element={<MaintenancePage />} />
+          <Route path="/admin/service/repair" element={<RepairPage />} />
+          <Route path="/admin/service/warranty" element={<WarrantyPage />} />
+          <Route path="service/trash" element={<ServiceTrashPage />} />
 
         </Route>
       </Routes>

@@ -10,6 +10,7 @@ import couponRoutes from "../modules/coupon/coupon.routes";
 import reviewRoutes from "../modules/review/review.routes";
 import wishlistRoutes from "../modules/wishlist/wishlist.routes";
 import addressRoutes from "../modules/address/address.routes";
+import serviceRequestRoutes from "../modules/service-request/service-request.routes";
 
 const router = Router();
 
@@ -24,5 +25,6 @@ router.use("/coupons", couponRoutes);
 router.use("/reviews", reviewRoutes);
 router.use("/wishlists", wishlistRoutes);
 router.use("/addresses", addressRoutes);
+router.use("/service-requests", serviceRequestRoutes);
 
 export default router;

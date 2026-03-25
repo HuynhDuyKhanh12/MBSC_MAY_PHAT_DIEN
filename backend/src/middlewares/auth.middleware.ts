@@ -44,3 +44,48 @@ export const requireRole = (...roles: string[]) => {
     next();
   };
 };
+
+export const requireAnyRole = (...roles: string[]) => {
+  return (req: AuthRequest, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden",
+      });
+    }
+
+    next();
+  };
+};
+
+export const requireSelfOrRole = (
+  getOwnerId: (req: AuthRequest) => number | undefined,
+  ...roles: string[]
+) => {
+  return (req: AuthRequest, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const ownerId = getOwnerId(req);
+
+    if (roles.includes(req.user.role) || req.user.id === ownerId) {
+      return next();
+    }
+
+    return res.status(403).json({
+      success: false,
+      message: "Forbidden",
+    });
+  };
+};

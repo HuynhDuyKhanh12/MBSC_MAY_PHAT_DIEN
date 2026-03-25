@@ -26,7 +26,8 @@
         "ignore": [
           "-webkit-overflow-scrolling",
           "scrollbar-width",
-          "scrollbar-width: none"
+          "scrollbar-width: none",
+          "backdrop-filter"
         ]
       }
     ]

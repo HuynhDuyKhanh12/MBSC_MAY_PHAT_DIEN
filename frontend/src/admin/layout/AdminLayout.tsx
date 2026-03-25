@@ -12,6 +12,10 @@ import {
   FaSignOutAlt,
   FaUserCircle,
   FaSignInAlt,
+  FaTools,
+  FaCogs,
+  FaWrench,
+  FaShieldAlt,
 } from "react-icons/fa";
 import "./admin.css";
 
@@ -24,6 +28,7 @@ export default function AdminLayout() {
   const [openProduct, setOpenProduct] = useState(false);
   const [openOrder, setOpenOrder] = useState(false);
   const [openCustomer, setOpenCustomer] = useState(false);
+  const [openService, setOpenService] = useState(true);
 
   const [adminUser, setAdminUser] = useState<AdminUser | null>(() => {
     const storedUser = localStorage.getItem("adminUser");
@@ -163,6 +168,46 @@ export default function AdminLayout() {
               <NavLink to="/admin/wishlist" className="sidebar__subitem">
                 <span className="sidebar__dot" />
                 Wishlist — Yêu thích
+              </NavLink>
+            </div>
+          )}
+
+          <button
+            type="button"
+            className="sidebar__item sidebar__dropdownBtn"
+            onClick={() => setOpenService(!openService)}
+          >
+            <span className="sidebar__itemLeft">
+              <FaTools />
+              Dịch vụ kỹ thuật
+            </span>
+            {openService ? <FaChevronDown /> : <FaChevronRight />}
+          </button>
+
+          {openService && (
+            <div className="sidebar__submenu">
+              <NavLink to="/admin/service" className="sidebar__subitem">
+                <span className="sidebar__dot" />
+                <FaCogs />
+                Tổng quan dịch vụ
+              </NavLink>
+
+              <NavLink to="/admin/service/maintenance" className="sidebar__subitem">
+                <span className="sidebar__dot" />
+                <FaTools />
+                Bảo quản
+              </NavLink>
+
+              <NavLink to="/admin/service/repair" className="sidebar__subitem">
+                <span className="sidebar__dot" />
+                <FaWrench />
+                Sửa chữa
+              </NavLink>
+
+              <NavLink to="/admin/service/warranty" className="sidebar__subitem">
+                <span className="sidebar__dot" />
+                <FaShieldAlt />
+                Bảo hành
               </NavLink>
             </div>
           )}

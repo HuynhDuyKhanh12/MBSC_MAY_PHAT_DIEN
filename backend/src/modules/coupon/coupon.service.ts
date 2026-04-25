@@ -1,6 +1,7 @@
 import { prisma } from "../../config/prisma";
 
 type CreateCouponInput = {
+  title: string;
   code: string;
   description?: string;
   discountType: string;
@@ -14,23 +15,24 @@ type CreateCouponInput = {
 };
 
 type UpdateCouponInput = {
+  title?: string;
   code?: string;
   description?: string;
   discountType?: string;
   discountValue?: number;
-  minOrderValue?: number;
-  maxDiscountValue?: number;
-  usageLimit?: number;
+  minOrderValue?: number | null;
+  maxDiscountValue?: number | null;
+  usageLimit?: number | null;
   startDate?: string;
   endDate?: string;
   isActive?: boolean;
-  deletedAt?: Date | null;
 };
 
 export const getCouponByIdService = async (id: number) => {
   return prisma.coupon.findFirst({
     where: {
       id,
+      deletedAt: null,
     },
   });
 };
@@ -38,23 +40,29 @@ export const getCouponByIdService = async (id: number) => {
 export const createCouponService = async (data: CreateCouponInput) => {
   const existingCoupon = await prisma.coupon.findFirst({
     where: {
-      code: data.code,
+      code: String(data.code).trim().toUpperCase(),
     },
   });
 
   if (existingCoupon) {
-    throw new Error("Coupon code already exists");
+    const error: any = new Error("Coupon code already exists");
+    error.statusCode = 400;
+    throw error;
   }
 
   return prisma.coupon.create({
     data: {
-      code: data.code,
-      description: data.description,
+      title: String(data.title).trim(),
+      code: String(data.code).trim().toUpperCase(),
+      description: data.description ? String(data.description).trim() : null,
       discountType: data.discountType as any,
-      discountValue: data.discountValue,
-      minOrderValue: data.minOrderValue,
-      maxDiscountValue: data.maxDiscountValue,
-      usageLimit: data.usageLimit,
+      discountValue: Number(data.discountValue),
+      minOrderValue:
+        data.minOrderValue !== undefined ? Number(data.minOrderValue) : null,
+      maxDiscountValue:
+        data.maxDiscountValue !== undefined ? Number(data.maxDiscountValue) : null,
+      usageLimit:
+        data.usageLimit !== undefined ? Number(data.usageLimit) : null,
       startDate: new Date(data.startDate),
       endDate: new Date(data.endDate),
       isActive: data.isActive ?? true,
@@ -65,7 +73,20 @@ export const createCouponService = async (data: CreateCouponInput) => {
 export const getCouponsService = async () => {
   return prisma.coupon.findMany({
     where: {
-      isActive: true,
+      deletedAt: null,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
+export const getTrashCouponsService = async () => {
+  return prisma.coupon.findMany({
+    where: {
+      deletedAt: {
+        not: null,
+      },
     },
     orderBy: {
       createdAt: "desc",
@@ -77,10 +98,23 @@ export const updateCouponService = async (
   id: number,
   data: UpdateCouponInput
 ) => {
+  const coupon = await prisma.coupon.findFirst({
+    where: {
+      id,
+      deletedAt: null,
+    },
+  });
+
+  if (!coupon) {
+    const error: any = new Error("Coupon not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
   if (data.code) {
     const existingCoupon = await prisma.coupon.findFirst({
       where: {
-        code: data.code,
+        code: String(data.code).trim().toUpperCase(),
         NOT: {
           id,
         },
@@ -88,29 +122,38 @@ export const updateCouponService = async (
     });
 
     if (existingCoupon) {
-      throw new Error("Coupon code already exists");
+      const error: any = new Error("Coupon code already exists");
+      error.statusCode = 400;
+      throw error;
     }
   }
 
   return prisma.coupon.update({
     where: { id },
     data: {
-      ...(data.code !== undefined && { code: data.code }),
-      ...(data.description !== undefined && { description: data.description }),
+      ...(data.title !== undefined && { title: String(data.title).trim() }),
+      ...(data.code !== undefined && {
+        code: String(data.code).trim().toUpperCase(),
+      }),
+      ...(data.description !== undefined && {
+        description: data.description ? String(data.description).trim() : null,
+      }),
       ...(data.discountType !== undefined && {
         discountType: data.discountType as any,
       }),
       ...(data.discountValue !== undefined && {
-        discountValue: data.discountValue,
+        discountValue: Number(data.discountValue),
       }),
       ...(data.minOrderValue !== undefined && {
-        minOrderValue: data.minOrderValue,
+        minOrderValue:
+          data.minOrderValue === null ? null : Number(data.minOrderValue),
       }),
       ...(data.maxDiscountValue !== undefined && {
-        maxDiscountValue: data.maxDiscountValue,
+        maxDiscountValue:
+          data.maxDiscountValue === null ? null : Number(data.maxDiscountValue),
       }),
       ...(data.usageLimit !== undefined && {
-        usageLimit: data.usageLimit,
+        usageLimit: data.usageLimit === null ? null : Number(data.usageLimit),
       }),
       ...(data.startDate !== undefined && {
         startDate: new Date(data.startDate),
@@ -126,10 +169,101 @@ export const updateCouponService = async (
 };
 
 export const deleteCouponService = async (id: number) => {
+  const coupon = await prisma.coupon.findFirst({
+    where: {
+      id,
+      deletedAt: null,
+    },
+  });
+
+  if (!coupon) {
+    const error: any = new Error("Coupon not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
   return prisma.coupon.update({
     where: { id },
     data: {
+      deletedAt: new Date(),
       isActive: false,
+    },
+  });
+};
+
+export const restoreCouponService = async (id: number) => {
+  const coupon = await prisma.coupon.findFirst({
+    where: {
+      id,
+      deletedAt: {
+        not: null,
+      },
+    },
+  });
+
+  if (!coupon) {
+    const error: any = new Error("Coupon not found in trash");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  return prisma.coupon.update({
+    where: { id },
+    data: {
+      deletedAt: null,
+    },
+  });
+};
+
+export const forceDeleteCouponService = async (id: number) => {
+  const coupon = await prisma.coupon.findFirst({
+    where: {
+      id,
+    },
+    include: {
+      orders: {
+        take: 1,
+      },
+    },
+  });
+
+  if (!coupon) {
+    const error: any = new Error("Coupon not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (coupon.orders.length > 0) {
+    const error: any = new Error(
+      "Cannot permanently delete coupon because it has been used in orders"
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+
+  return prisma.coupon.delete({
+    where: { id },
+  });
+};
+
+export const toggleCouponService = async (id: number) => {
+  const coupon = await prisma.coupon.findFirst({
+    where: {
+      id,
+      deletedAt: null,
+    },
+  });
+
+  if (!coupon) {
+    const error: any = new Error("Coupon not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  return prisma.coupon.update({
+    where: { id },
+    data: {
+      isActive: !coupon.isActive,
     },
   });
 };

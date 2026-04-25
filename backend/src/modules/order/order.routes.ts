@@ -4,6 +4,7 @@ import {
   createOrder,
   getAllOrders,
   getMyOrders,
+  getOrderById,
   updateOrderStatus,
 } from "./order.controller";
 
@@ -99,6 +100,26 @@ router.get("/me", authMiddleware, getMyOrders);
  *         description: Get all orders successful
  */
 router.get("/", authMiddleware, requireRole("ADMIN"), getAllOrders);
+
+/**
+ * @swagger
+ * /api/orders/{id}:
+ *   get:
+ *     summary: Lấy chi tiết đơn hàng
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Get order detail successful
+ */
+router.get("/:id", authMiddleware, requireRole("ADMIN"), getOrderById);
 
 /**
  * @swagger

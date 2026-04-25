@@ -1,20 +1,16 @@
-import { Response, NextFunction } from "express";
+import { Response } from "express";
 import { AuthRequest } from "../../middlewares/auth.middleware";
 import {
   addToCartService,
-  deleteCartItemService,
+  deleteCartItemByProductService,
   getCartService,
-  updateCartItemService,
+  updateCartItemByProductService,
 } from "./cart.service";
 import { successResponse } from "../../utils/response";
 
-export const addToCart = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-) => {
+export const addToCart = async (req: AuthRequest, res: Response) => {
   try {
-    const { productId, variantId, quantity } = req.body;
+    const { productId, variantId, quantity } = req.body || {};
 
     if (!productId || Number.isNaN(Number(productId))) {
       return res.status(400).json({
@@ -41,72 +37,86 @@ export const addToCart = async (
     );
 
     return successResponse(res, "Add to cart successful", result, 201);
-  } catch (error) {
-    next(error);
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Internal Server Error",
+    });
   }
 };
 
-export const getCart = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-) => {
+export const getCart = async (req: AuthRequest, res: Response) => {
   try {
     const result = await getCartService(req.user.id);
     return successResponse(res, "Get cart successful", result);
-  } catch (error) {
-    next(error);
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Internal Server Error",
+    });
   }
 };
 
-export const updateCartItem = async (
+export const updateCartItemByProduct = async (
   req: AuthRequest,
-  res: Response,
-  next: NextFunction
+  res: Response
 ) => {
   try {
-    const itemId = Number(req.params.id);
-    const quantity = Number(req.body.quantity);
+    const productId = Number(req.params.productId);
+    const { quantity, variantId } = req.body || {};
 
-    if (Number.isNaN(itemId)) {
+    if (Number.isNaN(productId)) {
       return res.status(400).json({
         success: false,
-        message: "Cart item id is invalid",
+        message: "Product id is invalid",
       });
     }
 
-    if (Number.isNaN(quantity) || quantity <= 0) {
+    if (!quantity || Number(quantity) <= 0) {
       return res.status(400).json({
         success: false,
         message: "Quantity must be greater than 0",
       });
     }
 
-    const result = await updateCartItemService(req.user.id, itemId, quantity);
+    const result = await updateCartItemByProductService(
+      req.user.id,
+      productId,
+      variantId ?? null,
+      Number(quantity)
+    );
+
     return successResponse(res, "Update cart item successful", result);
-  } catch (error) {
-    next(error);
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Internal Server Error",
+    });
   }
 };
 
-export const deleteCartItem = async (
+export const deleteCartItemByProduct = async (
   req: AuthRequest,
-  res: Response,
-  next: NextFunction
+  res: Response
 ) => {
   try {
-    const itemId = Number(req.params.id);
+    const productId = Number(req.params.productId);
+    const body = req.body || {};
 
-    if (Number.isNaN(itemId)) {
-      return res.status(400).json({
-        success: false,
-        message: "Cart item id is invalid",
-      });
-    }
+    const variantId =
+      body.variantId ?? req.query.variantId ?? null;
 
-    const result = await deleteCartItemService(req.user.id, itemId);
+    const result = await deleteCartItemByProductService(
+      req.user.id,
+      productId,
+      variantId ? Number(variantId) : null
+    );
+
     return successResponse(res, "Delete cart item successful", result);
-  } catch (error) {
-    next(error);
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Internal Server Error",
+    });
   }
 };

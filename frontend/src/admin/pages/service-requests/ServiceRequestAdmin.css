@@ -1,0 +1,275 @@
+.srPage {
+  padding: 24px;
+  font-family: "Times New Roman", Times, serif;
+  background: #f5f7fb;
+  min-height: 100vh;
+  color: #1f2937;
+}
+
+.srHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.srHeader h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.srHeader p {
+  margin: 6px 0 0;
+  color: #6b7280;
+}
+
+.srHeaderActions {
+  display: flex;
+  gap: 10px;
+}
+
+.srFilter {
+  background: #fff;
+  padding: 16px;
+  border-radius: 16px;
+  display: grid;
+  grid-template-columns: 1fr 180px 200px 100px;
+  gap: 12px;
+  margin-bottom: 18px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.srFilter input,
+.srFilter select,
+.srFilter button,
+.srForm input,
+.srForm select,
+.srForm textarea,
+.srAssign input {
+  height: 42px;
+  border: 1px solid #d9dee8;
+  border-radius: 10px;
+  padding: 0 12px;
+  outline: none;
+  font-family: inherit;
+  font-size: 15px;
+  background: #fff;
+}
+
+.srFilter button,
+.srAssign button,
+.srFormActions button[type="submit"] {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.srCard {
+  background: #fff;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  margin-bottom: 18px;
+}
+
+.srCard h2 {
+  margin: 0 0 12px;
+  font-size: 20px;
+}
+
+.srTableWrap {
+  overflow-x: auto;
+}
+
+.srTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1100px;
+}
+
+.srTable th,
+.srTable td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #eef1f5;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.srTable th {
+  background: #f8fafc;
+  font-size: 14px;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.srTable td span {
+  display: block;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.srCode {
+  font-weight: 800;
+  color: #0f766e;
+}
+
+.srStatus {
+  min-width: 140px;
+  font-weight: 700;
+}
+
+.srActions {
+  display: flex;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.srBtn {
+  border: none;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.srBtn.view {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.srBtn.edit {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.srBtn.delete {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.srEmpty {
+  padding: 30px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.srGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.srImages {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.srImages img {
+  width: 140px;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+}
+
+.srLogs {
+  display: grid;
+  gap: 12px;
+}
+
+.srLog {
+  border-left: 4px solid #2563eb;
+  background: #f8fafc;
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.srLog span {
+  display: block;
+  margin: 4px 0;
+  color: #475569;
+}
+
+.srLog p {
+  margin: 4px 0;
+}
+
+.srLog small {
+  color: #6b7280;
+}
+
+.srAssign {
+  display: flex;
+  gap: 10px;
+}
+
+.srAssign input {
+  flex: 1;
+}
+
+.srAssign button {
+  padding: 0 16px;
+}
+
+.srForm {
+  background: #fff;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.srFormGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.srForm label {
+  display: grid;
+  gap: 8px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.srForm textarea {
+  height: 110px;
+  padding-top: 10px;
+  resize: vertical;
+}
+
+.srFormActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.srFormActions button {
+  padding: 11px 18px;
+  border-radius: 10px;
+  border: 1px solid #d9dee8;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .srFilter,
+  .srGrid,
+  .srFormGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .srHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

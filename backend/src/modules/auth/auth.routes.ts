@@ -1,7 +1,14 @@
 import { Router } from "express";
-import { login, refreshToken, register } from "./auth.controller";
+import { login, register } from "./auth.controller";
 
 const router = Router();
+
+/**
+ * @swagger
+ * tags:
+ *   name: Auth
+ *   description: APIs xác thực
+ */
 
 /**
  * @swagger
@@ -22,15 +29,19 @@ const router = Router();
  *             properties:
  *               fullName:
  *                 type: string
+ *                 example: Nguyen Van A
  *               email:
  *                 type: string
+ *                 example: user@gmail.com
  *               phone:
  *                 type: string
+ *                 example: 0909123456
  *               password:
  *                 type: string
+ *                 example: 123456
  *     responses:
  *       201:
- *         description: Register successful
+ *         description: Đăng ký thành công và trả token
  */
 router.post("/register", register);
 
@@ -52,33 +63,14 @@ router.post("/register", register);
  *             properties:
  *               email:
  *                 type: string
+ *                 example: user@gmail.com
  *               password:
  *                 type: string
+ *                 example: 123456
  *     responses:
  *       200:
- *         description: Login successful
+ *         description: Đăng nhập thành công và trả token
  */
 router.post("/login", login);
-
-/**
- * @swagger
- * /api/auth/refresh-token:
- *   post:
- *     summary: Làm mới access token
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               refreshToken:
- *                 type: string
- *     responses:
- *       200:
- *         description: Refresh token successful
- */
-router.post("/refresh-token", refreshToken);
 
 export default router;

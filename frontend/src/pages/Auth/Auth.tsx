@@ -1,12 +1,39 @@
 import React, { useState } from "react";
+import { useNavigate, Navigate } from "react-router-dom";
 import "./auth.css";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
+import { loginApi, registerApi } from "../../api/modules/authApi";
 
 type TabType = "login" | "register";
 
 const Auth: React.FC = () => {
+  const navigate = useNavigate();
   const [tab, setTab] = useState<TabType>("login");
+  const [loading, setLoading] = useState(false);
+
+  const token = localStorage.getItem("token");
+  const userRaw = localStorage.getItem("user");
+
+  if (token && userRaw) {
+    try {
+      const user = JSON.parse(userRaw);
+      const role = user?.role?.name || user?.role || "";
+
+      if (
+        role === "ADMIN" ||
+        role === "SUPER_ADMIN" ||
+        role === "WEB_MANAGER"
+      ) {
+        return <Navigate to="/admin" replace />;
+      }
+
+      return <Navigate to="/" replace />;
+    } catch {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+    }
+  }
 
   const [loginData, setLoginData] = useState({
     email: "",
@@ -21,23 +48,134 @@ const Auth: React.FC = () => {
     confirmPassword: "",
   });
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Đăng nhập:", loginData);
-    alert("Đăng nhập thành công (demo)");
+
+    const email = loginData.email.trim().toLowerCase();
+    const password = loginData.password;
+
+    if (!email) {
+      alert("Vui lòng nhập email");
+      return;
+    }
+
+    if (!password) {
+      alert("Vui lòng nhập mật khẩu");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const res = await loginApi({
+        email,
+        password,
+      });
+
+      console.log("LOGIN FULL RESPONSE:", res);
+
+      const token = res?.data?.accessToken;
+      const refreshToken = res?.data?.refreshToken;
+      const user = res?.data?.user;
+
+      if (!token) {
+        alert("Đăng nhập thất bại: không nhận được access token");
+        return;
+      }
+
+      localStorage.setItem("token", token);
+
+      if (refreshToken) {
+        localStorage.setItem("refreshToken", refreshToken);
+      }
+
+      if (user) {
+        localStorage.setItem("user", JSON.stringify(user));
+      }
+
+      alert(res?.message || "Đăng nhập thành công");
+
+      const role = user?.role?.name || user?.role || "";
+
+      if (
+        role === "ADMIN" ||
+        role === "SUPER_ADMIN" ||
+        role === "WEB_MANAGER"
+      ) {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
+    } catch (error: any) {
+      console.error("LOGIN ERROR:", error?.response?.data || error);
+      const message =
+        error?.response?.data?.message || error?.message || "Đăng nhập thất bại";
+      alert(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (registerData.password !== registerData.confirmPassword) {
+    const fullName = registerData.fullName.trim();
+    const email = registerData.email.trim().toLowerCase();
+    const phone = registerData.phone.trim();
+    const password = registerData.password;
+    const confirmPassword = registerData.confirmPassword;
+
+    if (!fullName) {
+      alert("Vui lòng nhập họ và tên");
+      return;
+    }
+
+    if (!email) {
+      alert("Vui lòng nhập email");
+      return;
+    }
+
+    if (!password) {
+      alert("Vui lòng nhập mật khẩu");
+      return;
+    }
+
+    if (password !== confirmPassword) {
       alert("Mật khẩu nhập lại không khớp");
       return;
     }
 
-    console.log("Đăng ký:", registerData);
-    alert("Đăng ký thành công (demo)");
-    setTab("login");
+    try {
+      setLoading(true);
+
+      const res = await registerApi({
+        fullName,
+        email,
+        phone,
+        password,
+      });
+
+      console.log("REGISTER FULL RESPONSE:", res);
+
+      alert(res?.message || "Đăng ký thành công, vui lòng đăng nhập");
+
+      setRegisterData({
+        fullName: "",
+        email: "",
+        phone: "",
+        password: "",
+        confirmPassword: "",
+      });
+
+      setTab("login");
+    } catch (error: any) {
+      console.error("REGISTER ERROR:", error?.response?.data || error);
+      const message =
+        error?.response?.data?.message || error?.message || "Đăng ký thất bại";
+      alert(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -67,6 +205,7 @@ const Auth: React.FC = () => {
                   className={`authTab ${tab === "login" ? "active" : ""}`}
                   onClick={() => setTab("login")}
                   type="button"
+                  disabled={loading}
                 >
                   Đăng nhập
                 </button>
@@ -74,6 +213,7 @@ const Auth: React.FC = () => {
                   className={`authTab ${tab === "register" ? "active" : ""}`}
                   onClick={() => setTab("register")}
                   type="button"
+                  disabled={loading}
                 >
                   Đăng ký
                 </button>
@@ -109,8 +249,8 @@ const Auth: React.FC = () => {
                     />
                   </div>
 
-                  <button className="authSubmit" type="submit">
-                    Đăng nhập
+                  <button className="authSubmit" type="submit" disabled={loading}>
+                    {loading ? "Đang đăng nhập..." : "Đăng nhập"}
                   </button>
 
                   <p className="authBottomText">
@@ -119,6 +259,7 @@ const Auth: React.FC = () => {
                       type="button"
                       className="authSwitch"
                       onClick={() => setTab("register")}
+                      disabled={loading}
                     >
                       Đăng ký ngay
                     </button>
@@ -207,8 +348,8 @@ const Auth: React.FC = () => {
                     />
                   </div>
 
-                  <button className="authSubmit" type="submit">
-                    Đăng ký
+                  <button className="authSubmit" type="submit" disabled={loading}>
+                    {loading ? "Đang đăng ký..." : "Đăng ký"}
                   </button>
 
                   <p className="authBottomText">
@@ -217,6 +358,7 @@ const Auth: React.FC = () => {
                       type="button"
                       className="authSwitch"
                       onClick={() => setTab("login")}
+                      disabled={loading}
                     >
                       Đăng nhập
                     </button>

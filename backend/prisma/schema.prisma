@@ -127,8 +127,8 @@ model User {
   refreshTokens RefreshToken[]
   auditLogs     AuditLog[]
 
-  serviceRequests         ServiceRequest[]    @relation("CustomerServiceRequests")
-  assignedServiceRequests ServiceRequest[]    @relation("TechnicianServiceRequests")
+  serviceRequests         ServiceRequest[] @relation("CustomerServiceRequests")
+  assignedServiceRequests ServiceRequest[] @relation("TechnicianServiceRequests")
   serviceRequestLogs      ServiceRequestLog[]
 
   createdAt DateTime  @default(now())
@@ -159,6 +159,7 @@ model Brand {
   slug        String    @unique
   logo        String?
   description String?   @db.Text
+  isVisible   Boolean   @default(true)
   products    Product[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -171,6 +172,7 @@ model Category {
   slug        String     @unique
   description String?    @db.Text
   image       String?
+  isVisible   Boolean    @default(true)
   parentId    Int?
   parent      Category?  @relation("CategoryTree", fields: [parentId], references: [id])
   children    Category[] @relation("CategoryTree")
@@ -301,6 +303,7 @@ model Coupon {
   orders           Order[]
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
+  deletedAt        DateTime?
 }
 
 model Order {

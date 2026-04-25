@@ -2,6 +2,16 @@ import { prisma } from "../../config/prisma";
 
 const generateOrderCode = () => "ORD" + Date.now();
 
+const getCartItemUnitPrice = (item: any) => {
+  return Number(
+    item?.variant?.salePrice ??
+      item?.variant?.price ??
+      item?.product?.salePrice ??
+      item?.product?.basePrice ??
+      0
+  );
+};
+
 export const getOrderByIdService = async (id: number) => {
   return prisma.order.findUnique({
     where: { id },
@@ -28,24 +38,88 @@ export const createOrderService = async (userId: number, payload: any) => {
   });
 
   if (!cart || cart.items.length === 0) {
-    throw new Error("Cart is empty");
+    const error: any = new Error("Cart is empty");
+    error.statusCode = 400;
+    throw error;
   }
 
-  let subtotal = 0;
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
 
-  for (const item of cart.items) {
+  if (!user) {
+    const error: any = new Error("User not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  let addressRecord: any = null;
+
+  if (payload.addressId !== undefined && payload.addressId !== null) {
+    addressRecord = await prisma.address.findFirst({
+      where: {
+        id: Number(payload.addressId),
+        userId,
+      },
+    });
+
+    if (!addressRecord) {
+      const error: any = new Error("Address not found");
+      error.statusCode = 404;
+      throw error;
+    }
+  }
+
+  const orderItems = cart.items.map((item) => {
     if (!item.product || item.product.deletedAt || item.product.status !== "ACTIVE") {
-      throw new Error(`Product ${item.productId} is unavailable`);
+      const error: any = new Error(`Product ${item.productId} is unavailable`);
+      error.statusCode = 400;
+      throw error;
     }
 
-    subtotal += Number(item.unitPrice) * item.quantity;
+    if (item.variantId) {
+      if (!item.variant) {
+        const error: any = new Error("Variant not found");
+        error.statusCode = 404;
+        throw error;
+      }
 
-    if (item.variantId && item.variant) {
+      if (item.variant.productId !== item.productId) {
+        const error: any = new Error("Variant does not belong to product");
+        error.statusCode = 400;
+        throw error;
+      }
+
       if ((item.variant.stock ?? 0) < item.quantity) {
-        throw new Error(`Variant ${item.variant.sku} out of stock`);
+        const error: any = new Error(`Variant ${item.variant.sku} out of stock`);
+        error.statusCode = 400;
+        throw error;
       }
     }
-  }
+
+    const unitPrice = getCartItemUnitPrice(item);
+
+    if (!unitPrice || Number.isNaN(unitPrice)) {
+      const error: any = new Error(`Invalid price for product ${item.productId}`);
+      error.statusCode = 400;
+      throw error;
+    }
+
+    return {
+      productId: item.productId,
+      variantId: item.variantId,
+      productName: item.product.name,
+      sku: item.variant?.sku || item.product.sku,
+      image: item.variant?.image || item.product.thumbnail,
+      color: item.variant?.color || null,
+      size: item.variant?.size || null,
+      quantity: item.quantity,
+      unitPrice,
+      totalPrice: unitPrice * item.quantity,
+    };
+  });
+
+  const subtotal = orderItems.reduce((sum, item) => sum + item.totalPrice, 0);
 
   let discountAmount = 0;
   let couponId: number | null = null;
@@ -61,12 +135,16 @@ export const createOrderService = async (userId: number, payload: any) => {
     });
 
     if (!coupon) {
-      throw new Error("Coupon is invalid or expired");
+      const error: any = new Error("Coupon is invalid or expired");
+      error.statusCode = 400;
+      throw error;
     }
 
     if (coupon.usageLimit !== null && coupon.usageLimit !== undefined) {
       if ((coupon.usedCount ?? 0) >= coupon.usageLimit) {
-        throw new Error("Coupon usage limit exceeded");
+        const error: any = new Error("Coupon usage limit exceeded");
+        error.statusCode = 400;
+        throw error;
       }
     }
 
@@ -75,7 +153,9 @@ export const createOrderService = async (userId: number, payload: any) => {
       coupon.minOrderValue !== undefined &&
       subtotal < Number(coupon.minOrderValue)
     ) {
-      throw new Error("Order does not meet minimum value for coupon");
+      const error: any = new Error("Order does not meet minimum value for coupon");
+      error.statusCode = 400;
+      throw error;
     }
 
     couponId = coupon.id;
@@ -104,9 +184,23 @@ export const createOrderService = async (userId: number, payload: any) => {
     const order = await tx.order.create({
       data: {
         code: generateOrderCode(),
-        userId,
-        addressId: payload.addressId ?? null,
-        couponId,
+        user: {
+          connect: { id: userId },
+        },
+        ...(addressRecord
+          ? {
+              address: {
+                connect: { id: addressRecord.id },
+              },
+            }
+          : {}),
+        ...(couponId
+          ? {
+              coupon: {
+                connect: { id: couponId },
+              },
+            }
+          : {}),
         status: "PENDING",
         paymentMethod: payload.paymentMethod,
         paymentStatus: "UNPAID",
@@ -114,7 +208,7 @@ export const createOrderService = async (userId: number, payload: any) => {
         discountAmount,
         shippingFee,
         totalAmount,
-        note: payload.note,
+        note: payload.note || null,
         fullName: payload.fullName,
         phone: payload.phone,
         province: payload.province,
@@ -122,18 +216,7 @@ export const createOrderService = async (userId: number, payload: any) => {
         ward: payload.ward,
         detailAddress: payload.detailAddress,
         items: {
-          create: cart.items.map((item) => ({
-            productId: item.productId,
-            variantId: item.variantId,
-            productName: item.product.name,
-            sku: item.variant?.sku || item.product.sku,
-            image: item.variant?.image || item.product.thumbnail,
-            color: item.variant?.color || null,
-            size: item.variant?.size || null,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            totalPrice: Number(item.unitPrice) * item.quantity,
-          })),
+          create: orderItems,
         },
       },
       include: {
@@ -195,7 +278,7 @@ export const createOrderService = async (userId: number, payload: any) => {
 
 export const getMyOrdersService = async (userId: number) => {
   return prisma.order.findMany({
-    where: { userId },
+    where: { user: { id: userId } },
     include: {
       items: true,
       coupon: true,

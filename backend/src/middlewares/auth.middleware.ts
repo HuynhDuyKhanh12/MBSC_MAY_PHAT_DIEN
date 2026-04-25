@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import { verifyAccessToken } from "../utils/jwt";
+import { JwtPayload, verifyAccessToken } from "../utils/jwt";
 
 export interface AuthRequest extends Request {
-  user?: any;
+  user?: JwtPayload;
 }
 
 export const authMiddleware = (
@@ -25,22 +25,31 @@ export const authMiddleware = (
     const decoded = verifyAccessToken(token);
     req.user = decoded;
     next();
-  } catch {
+  } catch (error: any) {
     return res.status(401).json({
       success: false,
       message: "Invalid or expired token",
+      error: error?.message,
     });
   }
 };
 
 export const requireRole = (...roles: string[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
-    if (!req.user || !roles.includes(req.user.role)) {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
         message: "Forbidden",
       });
     }
+
     next();
   };
 };
@@ -79,7 +88,7 @@ export const requireSelfOrRole = (
 
     const ownerId = getOwnerId(req);
 
-    if (roles.includes(req.user.role) || req.user.id === ownerId) {
+    if (req.user.id === ownerId || roles.includes(req.user.role)) {
       return next();
     }
 

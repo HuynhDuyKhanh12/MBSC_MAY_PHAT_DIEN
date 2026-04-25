@@ -2,12 +2,19 @@ import { Router } from "express";
 import { authMiddleware } from "../../middlewares/auth.middleware";
 import {
   addToCart,
-  deleteCartItem,
+  deleteCartItemByProduct,
   getCart,
-  updateCartItem,
+  updateCartItemByProduct,
 } from "./cart.controller";
 
 const router = Router();
+
+/**
+ * @swagger
+ * tags:
+ *   name: Cart
+ *   description: APIs giỏ hàng
+ */
 
 /**
  * @swagger
@@ -58,15 +65,15 @@ router.post("/", authMiddleware, addToCart);
 
 /**
  * @swagger
- * /api/cart/items/{id}:
+ * /api/cart/product/{productId}:
  *   put:
- *     summary: Cập nhật số lượng sản phẩm trong giỏ
+ *     summary: Cập nhật số lượng theo productId
  *     tags: [Cart]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: productId
  *         required: true
  *         schema:
  *           type: integer
@@ -82,30 +89,39 @@ router.post("/", authMiddleware, addToCart);
  *               quantity:
  *                 type: integer
  *                 example: 3
+ *               variantId:
+ *                 type: integer
+ *                 nullable: true
+ *                 example: 1
  *     responses:
  *       200:
  *         description: Update cart item successful
  */
-router.put("/items/:id", authMiddleware, updateCartItem);
+router.put("/product/:productId", authMiddleware, updateCartItemByProduct);
 
 /**
  * @swagger
- * /api/cart/items/{id}:
+ * /api/cart/product/{productId}:
  *   delete:
- *     summary: Xóa sản phẩm khỏi giỏ hàng
+ *     summary: Xóa sản phẩm khỏi giỏ theo productId
  *     tags: [Cart]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: productId
  *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: variantId
+ *         required: false
  *         schema:
  *           type: integer
  *     responses:
  *       200:
  *         description: Delete cart item successful
  */
-router.delete("/items/:id", authMiddleware, deleteCartItem);
+router.delete("/product/:productId", authMiddleware, deleteCartItemByProduct);
 
 export default router;

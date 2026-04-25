@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Home from "./pages/Home/Home";
 import ProductList from "./pages/ProductList/ProductList";
@@ -12,158 +12,176 @@ import ProductDetail from "./pages/ProductDetail/ProductDetail";
 import Repair from "./pages/Repair/Repair";
 import Auth from "./pages/Auth/Auth";
 
-import AdminLayout from "./admin/layout/AdminLayout";
-import DashboardPage from "./admin/dashboard/DashboardPage";
-import ProductPage from "./admin/product/ProductPage";
-import ProductCreatePage from "./admin/product/ProductCreatePage";
-import CategoryPage from "./admin/category/CategoryPage";
-import CategoryCreatePage from "./admin/category/CategoryCreatePage";
-import BrandPage from "./admin/brand/BrandPage";
-import BrandCreatePage from "./admin/brand/BrandCreatePage";
-import UserPage from "./admin/user/UserPage";
-import UserCreatePage from "./admin/user/UserCreatePage";
-import AddressPage from "./admin/address/AddressPage";
-import AddressCreatePage from "./admin/address/AddressCreatePage";
-import WishlistPage from "./admin/wishlist/WishlistPage";
-import WishlistCreatePage from "./admin/wishlist/WishlistCreatePage";
-import CartPage from "./admin/cart/CartPage";
-import CouponPage from "./admin/coupon/CouponPage";
-import CouponCreatePage from "./admin/coupon/CouponCreatePage";
-import ReviewPage from "./admin/review/ReviewPage";
-import ReviewCreatePage from "./admin/review/ReviewCreatePage";
-import AuthPage from "./admin/auth/AuthPage";
-import AuthCreatePage from "./admin/auth/AuthCreatePage";
-import AdminLogin from "./admin/AdminLogin";
+import { ReviewListPage } from "./admin/pages/reviews";
+import AdminLayout from "./admin/AdminLayout";
+import WishlistListPage from "./admin/pages/wishlists/WishlistListPage";
 
-import ProductEditPage from "./admin/product/ProductEditPage";
-import ProductViewPage from "./admin/product/ProductViewPage";
-import ProductTrashPage from "./admin/product/ProductTrashPage";
+import {
+  BrandListPage,
+  BrandCreatePage,
+  BrandEditPage,
+  BrandTrashPage,
+} from "./admin/pages/brands";
 
-import CategoryTrashPage from "./admin/category/CategoryTrashPage";
-import CategoryViewPage from "./admin/category/CategoryViewPage";
-import CategoryEditPage from "./admin/category/CategoryEditPage";
+import {
+  CategoryListPage,
+  CategoryCreatePage,
+  CategoryEditPage,
+  CategoryTrashPage,
+} from "./admin/pages/categories";
 
-import BrandEditPage from "./admin/brand/BrandEditPage";
-import BrandViewPage from "./admin/brand/BrandViewPage";
-import BrandTrashPage from "./admin/brand/BrandTrashPage";
+import {
+  UserListPage,
+  UserCreatePage,
+  UserEditPage,
+  UserTrashPage,
+} from "./admin/pages/users";
 
-import ReviewViewPage from "./admin/review/ReviewViewPage";
-import ReviewTrashPage from "./admin/review/ReviewTrashPage";
+import {
+  ProductListPage,
+  ProductCreatePage,
+  ProductEditPage,
+  ProductTrashPage,
+} from "./admin/pages/products";
 
-import AuthViewPage from "./admin/auth/AuthViewPage";
-import AuthEditPage from "./admin/auth/AuthEditPage";
-import AuthTrashPage from "./admin/auth/AuthTrashPage";
+import {
+  CouponListPage,
+  CouponCreatePage,
+  CouponEditPage,
+  CouponTrashPage,
+} from "./admin/pages/coupons";
 
-import UserEditPage from "./admin/user/UserEditPage";
-import UserViewPage from "./admin/user/UserViewPage";
-import UserTrashPage from "./admin/user/UserTrashPage";
+import {
+  OrderListPage,
+  OrderViewPage,
+  OrderEditPage,
+} from "./admin/pages/orders";
 
-import AddressEditPage from "./admin/address/AddressEditPage";
-import AddressViewPage from "./admin/address/AddressViewPage";
-import AddressTrashPage from "./admin/address/AddressTrashPage";
+import {
+  ServiceRequestListPage,
+  ServiceRequestViewPage,
+  ServiceRequestEditPage,
+} from "./admin/pages/service-requests";
 
-import WishlistEditPage from "./admin/wishlist/WishlistEditPage";
-import WishlistViewPage from "./admin/wishlist/WishlistViewPage";
-import WishlistTrashPage from "./admin/wishlist/WishlistTrashPage";
+// ===== Placeholder (CHỈ giữ cho module chưa làm) =====
+function PagePlaceholder({ title }: { title: string }) {
+  return (
+    <div style={{ padding: 24 }}>
+      <h2>{title}</h2>
+    </div>
+  );
+}
 
-import CouponEditPage from "./admin/coupon/CouponEditPage";
-import CouponViewPage from "./admin/coupon/CouponViewPage";
-import CouponTrashPage from "./admin/coupon/CouponTrashPage";
+function DashboardPage() {
+  return <PagePlaceholder title="Dashboard" />;
+}
 
-import OrderPage from "./admin/order/OrderPage";
-import OrderEditPage from "./admin/order/OrderEditPage";
-import OrderViewPage from "./admin/order/OrderViewPage";
+function AuditLogListPage() {
+  return <PagePlaceholder title="Audit Logs" />;
+}
 
-import ServiceDashboardPage from "./admin/service/ServiceDashboardPage";
-import MaintenancePage from "./admin/service/MaintenancePage";
-import RepairPage from "./admin/service/RepairPage";
-import WarrantyPage from "./admin/service/WarrantyPage";
-import ServiceTrashPage from "./admin/service/ServiceTrashPage";
+// ===== Auth Admin =====
+function PrivateAdminRoute({ children }: { children: React.ReactNode }) {
+  const token = localStorage.getItem("token");
+  const userRaw = localStorage.getItem("user");
 
+  if (!token || !userRaw) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  try {
+    const user = JSON.parse(userRaw);
+    const role = user?.role?.name || user?.role;
+
+    if (
+      role === "ADMIN" ||
+      role === "SUPER_ADMIN" ||
+      role === "WEB_MANAGER"
+    ) {
+      return <>{children}</>;
+    }
+
+    return <Navigate to="/" replace />;
+  } catch {
+    return <Navigate to="/auth" replace />;
+  }
+}
+
+// ===== APP =====
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* USER */}
         <Route path="/" element={<Home />} />
-        <Route path="productlist" element={<ProductList />} />
-        <Route path="san-pham/:id" element={<ProductDetail />} />
-        <Route path="cart" element={<Cart />} />
-        <Route path="promotions" element={<Promotions />} />
-        <Route path="about" element={<About />} />
-        <Route path="blog" element={<Blog />} />
-        <Route path="blog/:id" element={<BlogDetail />} />
-        <Route path="repair" element={<RepairRegister />} />
+        <Route path="/productlist" element={<ProductList />} />
+        <Route path="/productlist/:id" element={<ProductDetail />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/promotions" element={<Promotions />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:id" element={<BlogDetail />} />
+        <Route path="/repair-register" element={<RepairRegister />} />
         <Route path="/repair" element={<Repair />} />
         <Route path="/auth" element={<Auth />} />
 
-        <Route path="/admin" element={<AdminLayout />}  >
+        {/* ADMIN */}
+        <Route
+          path="/admin"
+          element={
+            <PrivateAdminRoute>
+              <AdminLayout />
+            </PrivateAdminRoute>
+          }
+        >
           <Route index element={<DashboardPage />} />
-          <Route path="login" element={<AdminLogin />} />
-          <Route path="product" element={<ProductPage />} />
-          <Route path="product/create" element={<ProductCreatePage />} />
-          <Route path="category" element={<CategoryPage />} />
-          <Route path="category/create" element={<CategoryCreatePage />} />
-          <Route path="brand" element={<BrandPage />} />
-          <Route path="brand/create" element={<BrandCreatePage />} />
-          <Route path="user" element={<UserPage />} />
-          <Route path="user/create" element={<UserCreatePage />} />
-          <Route path="address" element={<AddressPage />} />
-          <Route path="address/create" element={<AddressCreatePage />} />
-          <Route path="wishlist" element={<WishlistPage />} />
-          <Route path="wishlist/create" element={<WishlistCreatePage />} />
-          <Route path="cart" element={<CartPage />} />
-          <Route path="coupon" element={<CouponPage />} />
-          <Route path="coupon/create" element={<CouponCreatePage />} />
-          <Route path="review" element={<ReviewPage />} />
-          <Route path="review/create" element={<ReviewCreatePage />} />
-          <Route path="auth" element={<AuthPage />} />
-          <Route path="auth/create" element={<AuthCreatePage />} />
 
-          <Route path="product/edit/:id" element={<ProductEditPage />} />
-          <Route path="product/view/:id" element={<ProductViewPage />} />
-          <Route path="product/trash" element={<ProductTrashPage />} />
+          {/* USERS */}
+          <Route path="users" element={<UserListPage />} />
+          <Route path="users/create" element={<UserCreatePage />} />
+          <Route path="users/edit/:id" element={<UserEditPage />} />
+          <Route path="users/trash" element={<UserTrashPage />} />
 
-          <Route path="category/edit/:id" element={<CategoryEditPage />} />
-          <Route path="category/view/:id" element={<CategoryViewPage />} />
-          <Route path="category/trash" element={<CategoryTrashPage />} />
+          {/* BRANDS */}
+          <Route path="brands" element={<BrandListPage />} />
+          <Route path="brands/create" element={<BrandCreatePage />} />
+          <Route path="brands/edit/:id" element={<BrandEditPage />} />
+          <Route path="brands/trash" element={<BrandTrashPage />} />
 
-          <Route path="brand/edit/:id" element={<BrandEditPage />} />
-          <Route path="brand/view/:id" element={<BrandViewPage />} />
-          <Route path="brand/trash" element={<BrandTrashPage />} />
+          {/* CATEGORIES */}
+          <Route path="categories" element={<CategoryListPage />} />
+          <Route path="categories/create" element={<CategoryCreatePage />} />
+          <Route path="categories/edit/:id" element={<CategoryEditPage />} />
+          <Route path="categories/trash" element={<CategoryTrashPage />} />
 
-          <Route path="review/view/:id" element={<ReviewViewPage />} />
-          <Route path="review/trash" element={<ReviewTrashPage />} />
+          {/* PRODUCTS */}
+          <Route path="products" element={<ProductListPage />} />
+          <Route path="products/create" element={<ProductCreatePage />} />
+          <Route path="products/edit/:id" element={<ProductEditPage />} />
+          <Route path="products/trash" element={<ProductTrashPage />} />
 
-          <Route path="auth/view/:id" element={<AuthViewPage />} />
-          <Route path="auth/edit/:id" element={<AuthEditPage />} />
-          <Route path="auth/trash" element={<AuthTrashPage />} />
-          <Route path="/admin/user/edit/:id" element={<UserEditPage />} />
-          <Route path="/admin/user/view/:id" element={<UserViewPage />} />
-          <Route path="/admin/user/trash" element={<UserTrashPage />} />
+          {/* COUPONS */}
+          <Route path="coupons" element={<CouponListPage />} />
+          <Route path="coupons/create" element={<CouponCreatePage />} />
+          <Route path="coupons/edit/:id" element={<CouponEditPage />} />
+          <Route path="coupons/trash" element={<CouponTrashPage />} />
 
-          <Route path="/admin/address/edit/:id" element={<AddressEditPage />} />
-          <Route path="/admin/address/view/:id" element={<AddressViewPage />} />
-          <Route path="/admin/address/trash" element={<AddressTrashPage />} />
+          {/* OTHER */}
+          <Route path="orders" element={<OrderListPage />} />
+          <Route path="orders/:id" element={<OrderViewPage />} />
+          <Route path="orders/edit/:id" element={<OrderEditPage />} />
 
-          <Route path="/admin/wishlist/edit/:id" element={<WishlistEditPage />} />
-          <Route path="/admin/wishlist/view/:id" element={<WishlistViewPage />} />
-          <Route path="/admin/wishlist/trash" element={<WishlistTrashPage />} />
+          <Route path="reviews" element={<ReviewListPage />} />
+          <Route path="/admin/wishlists" element={<WishlistListPage />} />
 
-          <Route path="/admin/coupon/edit/:id" element={<CouponEditPage />} />
-          <Route path="/admin/coupon/view/:id" element={<CouponViewPage />} />
-          <Route path="/admin/coupon/trash" element={<CouponTrashPage />} />
+          <Route path="/admin/service-requests" element={<ServiceRequestListPage />} />
+          <Route path="/admin/service-requests/:id" element={<ServiceRequestViewPage />} />
+          <Route path="/admin/service-requests/:id/edit" element={<ServiceRequestEditPage />} />
 
-          <Route path="/admin/order" element={<OrderPage />} />
-          <Route path="/admin/order/edit/:id" element={<OrderEditPage />} />
-          <Route path="/admin/order/view/:id" element={<OrderViewPage />} />
-
-          <Route path="/admin/service" element={<ServiceDashboardPage />} />
-          <Route path="/admin/service/maintenance" element={<MaintenancePage />} />
-          <Route path="/admin/service/repair" element={<RepairPage />} />
-          <Route path="/admin/service/warranty" element={<WarrantyPage />} />
-          <Route path="service/trash" element={<ServiceTrashPage />} />
-
+          <Route path="audit-logs" element={<AuditLogListPage />} />
         </Route>
+
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
   );

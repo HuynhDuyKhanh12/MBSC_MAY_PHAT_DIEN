@@ -16,10 +16,12 @@ export const successResponse = (
 export const errorResponse = (
   res: Response,
   message: string,
-  status = 400
+  status = 400,
+  error?: unknown
 ) => {
   return res.status(status).json({
     success: false,
     message,
+    error,
   });
 };

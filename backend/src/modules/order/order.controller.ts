@@ -135,6 +135,36 @@ export const getAllOrders = async (
   }
 };
 
+export const getOrderById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = Number(req.params.id);
+
+    if (Number.isNaN(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Order id is invalid",
+      });
+    }
+
+    const result = await getOrderByIdService(id);
+
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    return successResponse(res, "Get order detail successful", result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const updateOrderStatus = async (
   req: Request,
   res: Response,

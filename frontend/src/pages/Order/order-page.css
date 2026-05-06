@@ -1,0 +1,155 @@
+.orderPage {
+  background: #fff;
+  padding: 24px 0 50px;
+}
+
+.orderContainer {
+  width: min(1150px, calc(100% - 32px));
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 20px;
+  align-items: start;
+}
+
+.orderForm,
+.orderSummary {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.orderTitle {
+  margin: 0 0 18px;
+  font-size: 22px;
+  font-weight: 900;
+  color: #111827;
+}
+
+.orderGrid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.orderGrid3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+}
+
+.orderField {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.orderField label {
+  font-size: 13px;
+  font-weight: 800;
+  color: #374151;
+}
+
+.orderField input,
+.orderField select,
+.orderField textarea {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px 12px;
+  outline: none;
+  font-size: 14px;
+  background: #fff;
+  color: #111827;
+}
+
+.orderField input:focus,
+.orderField select:focus,
+.orderField textarea:focus {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.orderSubmit {
+  width: 100%;
+  height: 44px;
+  border: 0;
+  border-radius: 0;
+  background: #ff5a5f;
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+}
+
+.orderSubmit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.orderSummary {
+  position: sticky;
+  top: 16px;
+}
+
+.orderSummary h3 {
+  margin: 0 0 14px;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.orderSummaryRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-bottom: 1px solid #f1f5f9;
+  color: #111827;
+}
+
+.orderSummaryRow b {
+  font-weight: 900;
+}
+
+.orderSummaryRow.isTotal {
+  border-bottom: 0;
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px solid #e5e7eb;
+  color: #ef4444;
+  font-size: 16px;
+}
+
+.orderShipBox {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid #dbeafe;
+  background: #eff6ff;
+  border-radius: 10px;
+  color: #0f172a;
+  font-size: 13px;
+  display: grid;
+  gap: 6px;
+}
+
+.orderNote {
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 14px 0 0;
+}
+
+@media (max-width: 980px) {
+  .orderContainer {
+    grid-template-columns: 1fr;
+  }
+
+  .orderGrid2,
+  .orderGrid3 {
+    grid-template-columns: 1fr;
+  }
+
+  .orderSummary {
+    position: static;
+  }
+}

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import "./cart.css";
 import Header from "../../components/Header/Header";
@@ -11,6 +12,8 @@ import {
 
 type CartItem = {
   id: number;
+  productId: number;
+  variantId?: number | null;
   name: string;
   variant?: string;
   image: string;
@@ -61,7 +64,11 @@ const dateKey = (d: Date) => {
 
 const chunk = <T,>(arr: T[], size: number) => {
   const out: T[][] = [];
-  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+
+  for (let i = 0; i < arr.length; i += size) {
+    out.push(arr.slice(i, i + size));
+  }
+
   return out;
 };
 
@@ -90,6 +97,7 @@ function mapCartItem(item: any): CartItem {
   const price =
     Number(item.unitPrice) ||
     Number(item.price) ||
+    Number(variant.salePrice) ||
     Number(variant.price) ||
     Number(product.salePrice) ||
     Number(product.basePrice) ||
@@ -102,6 +110,8 @@ function mapCartItem(item: any): CartItem {
 
   return {
     id: Number(item.id),
+    productId: Number(item.productId || product.id),
+    variantId: item.variantId ?? variant.id ?? null,
     name: product.name || item.productName || item.name || "Sản phẩm",
     variant: variant.name || variant.sku || item.variantName || "",
     image: getImageSrc(
@@ -118,6 +128,7 @@ function mapCartItem(item: any): CartItem {
 }
 
 const Cart: React.FC = () => {
+  const navigate = useNavigate();
   const promoRef = useRef<HTMLDivElement | null>(null);
 
   const [items, setItems] = useState<CartItem[]>([]);
@@ -130,14 +141,11 @@ const Cart: React.FC = () => {
 
   const deliveryDays = useMemo(() => {
     const now = new Date();
-    const d0 = addDays(now, 0);
-    const d1 = addDays(now, 1);
-    const d2 = addDays(now, 2);
 
     return [
-      { key: dateKey(d0), label: formatDateVN(d0) },
-      { key: dateKey(d1), label: formatDateVN(d1) },
-      { key: dateKey(d2), label: formatDateVN(d2) },
+      { key: dateKey(addDays(now, 0)), label: formatDateVN(addDays(now, 0)) },
+      { key: dateKey(addDays(now, 1)), label: formatDateVN(addDays(now, 1)) },
+      { key: dateKey(addDays(now, 2)), label: formatDateVN(addDays(now, 2)) },
     ];
   }, []);
 
@@ -226,6 +234,7 @@ const Cart: React.FC = () => {
 
       if (error?.response?.status === 401) {
         alert("Bạn cần đăng nhập để xem giỏ hàng");
+        navigate("/auth");
       }
 
       setItems([]);
@@ -252,25 +261,27 @@ const Cart: React.FC = () => {
     if (!promoRef.current) return;
 
     const w = promoRef.current.clientWidth;
+
     promoRef.current.scrollBy({
       left: dir === "left" ? -w : w,
       behavior: "smooth",
     });
   };
 
-  const updateQty = async (id: number, nextQty: number) => {
+  const updateQty = async (item: CartItem, nextQty: number) => {
     if (nextQty < 1) return;
 
     try {
-      setUpdatingId(id);
+      setUpdatingId(item.id);
 
-      await updateCartItemApi(id, nextQty);
+      await updateCartItemApi(item.productId, nextQty, item.variantId);
 
       setItems((prev) =>
-        prev.map((it) => (it.id === id ? { ...it, qty: nextQty } : it))
+        prev.map((it) => (it.id === item.id ? { ...it, qty: nextQty } : it))
       );
     } catch (error: any) {
       console.log("Lỗi cập nhật số lượng:", error?.response?.data || error);
+
       alert(
         error?.response?.data?.message ||
           error?.message ||
@@ -281,18 +292,19 @@ const Cart: React.FC = () => {
     }
   };
 
-  const removeItem = async (id: number) => {
+  const removeItem = async (item: CartItem) => {
     const ok = window.confirm("Bạn có chắc muốn xoá sản phẩm này khỏi giỏ?");
     if (!ok) return;
 
     try {
-      setUpdatingId(id);
+      setUpdatingId(item.id);
 
-      await deleteCartItemApi(id);
+      await deleteCartItemApi(item.productId, item.variantId);
 
-      setItems((prev) => prev.filter((it) => it.id !== id));
+      setItems((prev) => prev.filter((it) => it.id !== item.id));
     } catch (error: any) {
       console.log("Lỗi xoá cart:", error?.response?.data || error);
+
       alert(
         error?.response?.data?.message ||
           error?.message ||
@@ -328,12 +340,29 @@ const Cart: React.FC = () => {
   const onCheckout = () => {
     if (!acceptedTerms) return;
 
+    if (items.length === 0) {
+      alert("Giỏ hàng đang trống");
+      return;
+    }
+
     if (deliveryMode === "time" && !confirmed) {
       alert("Bạn vui lòng xác nhận thời gian trước khi thanh toán!");
       return;
     }
 
-    alert("Đi tới thanh toán!");
+    const picked = deliveryDays.find((d) => d.key === deliveryDayKey);
+
+    navigate("/order", {
+      state: {
+        note,
+        needInvoice,
+        deliveryMode,
+        deliveryDate: picked?.label ?? "",
+        deliverySlot,
+        subtotal,
+        cartCount,
+      },
+    });
   };
 
   return (
@@ -359,7 +388,9 @@ const Cart: React.FC = () => {
                   ) : items.length === 0 ? (
                     <div className="cartEmpty">
                       <div className="cartEmpty__icon">🛒</div>
-                      <div className="cartEmpty__title">Giỏ hàng đang trống</div>
+                      <div className="cartEmpty__title">
+                        Giỏ hàng đang trống
+                      </div>
                       <div className="cartEmpty__desc">
                         Hãy thêm sản phẩm để tiếp tục mua sắm.
                       </div>
@@ -370,7 +401,7 @@ const Cart: React.FC = () => {
                         <button
                           className="cartItem__remove"
                           type="button"
-                          onClick={() => removeItem(it.id)}
+                          onClick={() => removeItem(it)}
                           title="Xoá"
                           disabled={updatingId === it.id}
                         >
@@ -420,7 +451,8 @@ const Cart: React.FC = () => {
                           <div className="qty">
                             <button
                               type="button"
-                              onClick={() => updateQty(it.id, it.qty - 1)}
+                              className="qty__btn"
+                              onClick={() => updateQty(it, it.qty - 1)}
                               aria-label="Giảm"
                               disabled={updatingId === it.id || it.qty <= 1}
                             >
@@ -433,7 +465,8 @@ const Cart: React.FC = () => {
 
                             <button
                               type="button"
-                              onClick={() => updateQty(it.id, it.qty + 1)}
+                              className="qty__btn"
+                              onClick={() => updateQty(it, it.qty + 1)}
                               aria-label="Tăng"
                               disabled={updatingId === it.id}
                             >
@@ -526,7 +559,9 @@ const Cart: React.FC = () => {
                         </div>
 
                         <div className="shipField">
-                          <div className="shipField__label">Thời gian giao</div>
+                          <div className="shipField__label">
+                            Thời gian giao
+                          </div>
 
                           <select
                             className="shipSelect"
@@ -558,8 +593,9 @@ const Cart: React.FC = () => {
                           ✅ Đã xác nhận{" "}
                           <b>
                             {
-                              deliveryDays.find((d) => d.key === deliveryDayKey)
-                                ?.label
+                              deliveryDays.find(
+                                (d) => d.key === deliveryDayKey
+                              )?.label
                             }
                           </b>{" "}
                           - <b>{deliverySlot.replace("-", " - ")}</b>
@@ -607,14 +643,16 @@ const Cart: React.FC = () => {
               <div className="policyBox">
                 <div className="policyTitle">Chính sách mua hàng:</div>
                 <div className="policyText">
-                  Hiện chúng tôi chỉ áp dụng thanh toán với đơn hàng có giá trị
-                  tối thiểu <b>400.000₫</b> trở lên.
+                  Sản phẩm sẽ được chuyển sang đơn hàng sau khi bạn nhập thông
+                  tin và bấm <b>ĐẶT HÀNG</b>.
                 </div>
               </div>
 
               <div className="promoBox">
                 <div className="promoHead">
-                  <div className="promoHead__title">Khuyến mãi dành cho bạn</div>
+                  <div className="promoHead__title">
+                    Khuyến mãi dành cho bạn
+                  </div>
 
                   <div className="promoNav">
                     <button

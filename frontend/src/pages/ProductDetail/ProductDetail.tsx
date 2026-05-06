@@ -8,9 +8,11 @@ import {
   getProductByIdApi,
   getProductsApi,
 } from "../../api/modules/productApi";
+import { addToCartApi } from "../../api/modules/cartApi";
 
 type Product = {
   id: number;
+  variantId?: number | null;
   name: string;
   sku?: string;
   brand?: string;
@@ -114,6 +116,7 @@ function mapApiProduct(item: any): Product {
 
   return {
     id: Number(item.id),
+    variantId: item.variants?.[0]?.id ?? item.productVariants?.[0]?.id ?? null,
     name: item.name || "Sản phẩm",
     sku: item.sku || "",
     brand: item.brand?.name || item.brandName || "MBSC",
@@ -153,6 +156,7 @@ export default function ProductDetail() {
   const [product, setProduct] = useState<Product | null>(null);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
+  const [adding, setAdding] = useState(false);
 
   const [active, setActive] = useState(0);
   const MIN = 1;
@@ -283,8 +287,42 @@ export default function ProductDetail() {
     });
   };
 
-  const onAddToCart = (p: Product, q: number) => {
-    alert(`Đã thêm vào giỏ: ${p.name} (SL: ${q})`);
+  const onAddToCart = async (p: Product, q: number) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        alert("Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng");
+        navigate("/auth");
+        return;
+      }
+
+      if (p.isOutOfStock) {
+        alert("Sản phẩm đã hết hàng");
+        return;
+      }
+
+      setAdding(true);
+
+      await addToCartApi({
+        productId: p.id,
+        quantity: q,
+        variantId: p.variantId ?? null,
+      });
+
+      alert("Đã thêm sản phẩm vào giỏ hàng");
+      navigate("/cart");
+    } catch (error: any) {
+      console.log("Lỗi thêm vào giỏ:", error?.response?.data || error);
+
+      alert(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Thêm vào giỏ hàng thất bại"
+      );
+    } finally {
+      setAdding(false);
+    }
   };
 
   if (loading) {
@@ -457,26 +495,25 @@ export default function ProductDetail() {
                 <button
                   className="pd-add"
                   type="button"
-                  disabled={!!product.isOutOfStock}
+                  disabled={!!product.isOutOfStock || adding}
                   onClick={() => {
                     if (product.isOutOfStock) return;
                     onAddToCart(product, qty);
-                    setQty(1);
                   }}
                 >
-                  THÊM VÀO GIỎ
+                  {adding ? "ĐANG THÊM..." : "THÊM VÀO GIỎ"}
                 </button>
 
                 <button
                   className="pd-buy"
                   type="button"
-                  disabled={!!product.isOutOfStock}
+                  disabled={!!product.isOutOfStock || adding}
                   onClick={() => {
                     if (product.isOutOfStock) return;
                     onAddToCart(product, qty);
                   }}
                 >
-                  MUA NGAY
+                  {adding ? "ĐANG XỬ LÝ..." : "MUA NGAY"}
                 </button>
               </div>
 

@@ -1,11 +1,14 @@
 import React, { useMemo, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import { getProductsApi } from "../../api/modules/productApi";
+import { addToCartApi } from "../../api/modules/cartApi";
 import "./product-list.css";
 
 type Product = {
   id: number;
+  variantId?: number | null;
   name: string;
   brand?: string;
   image: string;
@@ -73,7 +76,8 @@ function mapApiProduct(item: any): Product {
     : [];
 
   return {
-    id: item.id,
+    id: Number(item.id),
+    variantId: item.variants?.[0]?.id ?? item.productVariants?.[0]?.id ?? null,
     name: item.name || "Sản phẩm",
     sku: item.sku || "",
     brand: item.brand?.name || item.brandName || "MBSC",
@@ -91,8 +95,11 @@ function mapApiProduct(item: any): Product {
 }
 
 export default function ProductList() {
+  const navigate = useNavigate();
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
+  const [addingId, setAddingId] = useState<number | null>(null);
 
   const [sort, setSort] = useState<SortValue>("featured");
 
@@ -137,8 +144,42 @@ export default function ProductList() {
     loadProducts();
   }, []);
 
-  const onAddToCart = (p: Product, q: number) => {
-    alert(`Đã thêm vào giỏ: ${p.name} (SL: ${q})`);
+  const onAddToCart = async (p: Product, q: number) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        alert("Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng");
+        navigate("/auth");
+        return;
+      }
+
+      if (p.isOutOfStock) {
+        alert("Sản phẩm đã hết hàng");
+        return;
+      }
+
+      setAddingId(p.id);
+
+      await addToCartApi({
+        productId: p.id,
+        quantity: q,
+        variantId: p.variantId ?? null,
+      });
+
+      alert("Đã thêm sản phẩm vào giỏ hàng");
+      navigate("/cart");
+    } catch (error: any) {
+      console.log("Lỗi thêm giỏ hàng:", error?.response?.data || error);
+
+      alert(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Thêm vào giỏ hàng thất bại"
+      );
+    } finally {
+      setAddingId(null);
+    }
   };
 
   const sorted = useMemo(() => {
@@ -162,6 +203,7 @@ export default function ProductList() {
             if (p.discountPercent) s += Math.min(p.discountPercent, 30);
             return s;
           };
+
           return score(b) - score(a);
         });
     }
@@ -259,6 +301,7 @@ export default function ProductList() {
 
             <div className="p-sort">
               <span className="p-sort-label">Sắp xếp</span>
+
               <select
                 className="p-sort-select"
                 value={sort}
@@ -323,10 +366,9 @@ export default function ProductList() {
                           <div className="p-special">
                             <div className="p-special-top">
                               <span className="p-hot">HOT</span>
-                              <span className="p-range">
-                                25/04 - 30/04
-                              </span>
+                              <span className="p-range">25/04 - 30/04</span>
                             </div>
+
                             <div className="p-special-title">
                               GIẢM GIÁ ĐẶC BIỆT
                             </div>
@@ -369,12 +411,15 @@ export default function ProductList() {
                             className={`p-addcart ${
                               p.isOutOfStock ? "is-out" : ""
                             }`}
-                            disabled={p.isOutOfStock}
+                            disabled={p.isOutOfStock || addingId === p.id}
                             onClick={() => onAddToCart(p, 1)}
                           >
                             <span className="p-addcart__label">
-                              THÊM VÀO GIỎ
+                              {addingId === p.id
+                                ? "ĐANG THÊM..."
+                                : "THÊM VÀO GIỎ"}
                             </span>
+
                             <span className="p-addcart__icon">🛒</span>
                           </button>
                         </div>
@@ -539,6 +584,7 @@ export default function ProductList() {
                   )}
 
                   <span className="p-modal__sep">|</span>
+
                   <span
                     className={`p-modal__status ${
                       selected.isOutOfStock ? "is-out" : "is-in"
@@ -577,7 +623,9 @@ export default function ProductList() {
                     <button type="button" onClick={decQty}>
                       -
                     </button>
+
                     <span>{qty}</span>
+
                     <button type="button" onClick={incQty}>
                       +
                     </button>
@@ -587,10 +635,10 @@ export default function ProductList() {
                 <button
                   type="button"
                   className="p-modal__add"
-                  disabled={selected.isOutOfStock}
+                  disabled={selected.isOutOfStock || addingId === selected.id}
                   onClick={() => onAddToCart(selected, qty)}
                 >
-                  THÊM VÀO GIỎ
+                  {addingId === selected.id ? "ĐANG THÊM..." : "THÊM VÀO GIỎ"}
                 </button>
 
                 <div className="p-modal__share">

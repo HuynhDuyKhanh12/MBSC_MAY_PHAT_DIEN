@@ -11,6 +11,7 @@ import Promotions from "./pages/Promotions/Promotions";
 import ProductDetail from "./pages/ProductDetail/ProductDetail";
 import Repair from "./pages/Repair/Repair";
 import Auth from "./pages/Auth/Auth";
+import OrderPage from "./pages/Order/OrderPage";
 
 import { ReviewListPage } from "./admin/pages/reviews";
 import AdminLayout from "./admin/AdminLayout";
@@ -124,6 +125,7 @@ function App() {
         <Route path="/repair-register" element={<RepairRegister />} />
         <Route path="/repair" element={<Repair />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/order" element={<OrderPage />} />
 
         {/* ADMIN */}
         <Route

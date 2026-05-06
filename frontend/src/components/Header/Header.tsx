@@ -105,7 +105,7 @@ const Header: React.FC = () => {
 
       <div className="hd-main">
         <div className="container hd-main__inner">
-          <div className="hd-logo">FLYCAM24H</div>
+          <div className="hd-logo">MáyPhátĐiệnTĐ</div>
 
           <div className="hd-search">
             <input
@@ -319,10 +319,6 @@ const Header: React.FC = () => {
           <a href="/blog" className="hd-nav__link">BLOG</a>
           <a href="/about" className="hd-nav__link">GIỚI THIỆU</a>
           <a href="#" className="hd-nav__link">LANDING PAGE</a>
-
-          <div className="hd-nav__right">
-            <span className="live">🔴 Live stream</span>
-          </div>
         </div>
       </nav>
     </header>

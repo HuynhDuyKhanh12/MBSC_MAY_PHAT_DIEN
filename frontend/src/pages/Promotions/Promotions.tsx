@@ -1,7 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "./promotions.css";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
+import { getCouponsApi } from "../../api/modules/couponApi";
 
 type Promotion = {
   id: string;
@@ -14,63 +15,95 @@ type Promotion = {
   condition?: string;
 };
 
-const Promotions: React.FC = () => {
-  const promotions = useMemo<Promotion[]>(
-    () => [
-      {
-        id: "FREESHIP300",
-        title: "Miễn phí vận chuyển",
-        desc: "Đơn hàng từ 300k",
-        code: "A87TYRT55",
-        exp: "10/04/2026",
-        icon: "🚚",
-        minOrder: "300.000₫",
-        condition: "Áp dụng cho đơn giao hàng tiêu chuẩn",
-      },
-      {
-        id: "SALE20",
-        title: "Giảm 20%",
-        desc: "Đơn hàng từ 200k",
-        code: "QH5G8J0Y",
-        exp: "05/05/2026",
-        icon: "🎟️",
-        minOrder: "200.000₫",
-        condition: "Không áp dụng chung với mã khác",
-      },
-      {
-        id: "SALE50K",
-        title: "Giảm 50.000₫",
-        desc: "Đơn hàng từ 500k",
-        code: "FLY50K",
-        exp: "30/06/2026",
-        icon: "💸",
-        minOrder: "500.000₫",
-        condition: "Áp dụng cho toàn bộ sản phẩm",
-      },
-      {
-        id: "NEWUSER10",
-        title: "Khách mới giảm 10%",
-        desc: "Tối đa 150k",
-        code: "NEW10",
-        exp: "31/12/2026",
-        icon: "🆕",
-        minOrder: "0₫",
-        condition: "Chỉ áp dụng cho đơn đầu tiên",
-      },
-    ],
-    []
-  );
+const formatVND = (n: number) =>
+  Number(n || 0).toLocaleString("vi-VN", { maximumFractionDigits: 0 }) + "₫";
 
+function normalizeArrayResponse(res: any) {
+  if (Array.isArray(res)) return res;
+  if (Array.isArray(res?.data)) return res.data;
+  if (Array.isArray(res?.data?.data)) return res.data.data;
+  return [];
+}
+
+function formatDateVN(value?: string) {
+  if (!value) return "Không giới hạn";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return value;
+
+  return date.toLocaleDateString("vi-VN");
+}
+
+function mapCouponToPromotion(item: any): Promotion {
+  const discountType = item.discountType || item.type;
+  const discountValue = Number(item.discountValue || item.value || 0);
+  const minOrderValue = Number(item.minOrderValue || item.minOrder || 0);
+
+  const isPercent = discountType === "PERCENT";
+
+  return {
+    id: String(item.id),
+    title:
+      item.title ||
+      (isPercent ? `Giảm ${discountValue}%` : `Giảm ${formatVND(discountValue)}`),
+    desc:
+      item.description ||
+      (minOrderValue > 0
+        ? `Đơn hàng từ ${formatVND(minOrderValue)}`
+        : "Áp dụng cho đơn hàng hợp lệ"),
+    code: item.code || "",
+    exp: formatDateVN(item.endDate || item.expiredAt || item.expiresAt),
+    icon: isPercent ? "🎟️" : "💸",
+    minOrder: minOrderValue > 0 ? formatVND(minOrderValue) : "0₫",
+    condition:
+      item.condition ||
+      (item.isActive === false
+        ? "Mã hiện đang tạm tắt"
+        : "Sao chép mã và dùng ở bước thanh toán"),
+  };
+}
+
+const Promotions: React.FC = () => {
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const loadPromotions = async () => {
+      try {
+        setLoading(true);
+
+        const res = await getCouponsApi();
+
+        const data = normalizeArrayResponse(res)
+          .filter((item: any) => !item.deletedAt)
+          .filter((item: any) => item.isActive !== false)
+          .map(mapCouponToPromotion);
+
+        setPromotions(data);
+      } catch (error: any) {
+        console.log("Lỗi tải khuyến mãi:", error?.response?.data || error);
+        setPromotions([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPromotions();
+  }, []);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
+
     if (!q) return promotions;
+
     return promotions.filter(
       (p) =>
         p.title.toLowerCase().includes(q) ||
         p.desc.toLowerCase().includes(q) ||
-        p.code.toLowerCase().includes(q)
+        p.code.toLowerCase().includes(q) ||
+        String(p.condition || "").toLowerCase().includes(q)
     );
   }, [promotions, query]);
 
@@ -107,48 +140,57 @@ const Promotions: React.FC = () => {
             </div>
           </div>
 
-          <div className="promoGrid">
-            {filtered.map((p) => (
-              <div key={p.id} className="promoCard">
-                <div className="promoCard__left">
-                  <div className="promoBadge">{p.icon ?? "🎁"}</div>
-                </div>
-
-                <div className="promoCard__mid">
-                  <div className="promoCard__title">{p.title}</div>
-                  <div className="promoCard__desc">{p.desc}</div>
-
-                  <div className="promoCard__meta">
-                    <div>
-                      Mã: <b>{p.code}</b>
+          {loading ? (
+            <div className="promoEmpty">Đang tải khuyến mãi...</div>
+          ) : (
+            <>
+              <div className="promoGrid">
+                {filtered.map((p) => (
+                  <div key={p.id} className="promoCard">
+                    <div className="promoCard__left">
+                      <div className="promoBadge">{p.icon ?? "🎁"}</div>
                     </div>
-                    <div>HSD: {p.exp}</div>
-                  </div>
 
-                  <div className="promoCard__cond">
-                    <div>
-                      <span className="promoTag">Tối thiểu</span>{" "}
-                      <b>{p.minOrder}</b>
+                    <div className="promoCard__mid">
+                      <div className="promoCard__title">{p.title}</div>
+                      <div className="promoCard__desc">{p.desc}</div>
+
+                      <div className="promoCard__meta">
+                        <div>
+                          Mã: <b>{p.code}</b>
+                        </div>
+                        <div>HSD: {p.exp}</div>
+                      </div>
+
+                      <div className="promoCard__cond">
+                        <div>
+                          <span className="promoTag">Tối thiểu</span>{" "}
+                          <b>{p.minOrder}</b>
+                        </div>
+                        <div className="promoCondText">{p.condition}</div>
+                      </div>
                     </div>
-                    <div className="promoCondText">{p.condition}</div>
-                  </div>
-                </div>
 
-                <div className="promoCard__right">
-                  <button
-                    className="promoBtn"
-                    type="button"
-                    onClick={() => copyCode(p.code)}
-                  >
-                    SAO CHÉP MÃ
-                  </button>
-                </div>
+                    <div className="promoCard__right">
+                      <button
+                        className="promoBtn"
+                        type="button"
+                        onClick={() => copyCode(p.code)}
+                        disabled={!p.code}
+                      >
+                        SAO CHÉP MÃ
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
 
-          {filtered.length === 0 && (
-            <div className="promoEmpty">Không tìm thấy khuyến mãi phù hợp.</div>
+              {filtered.length === 0 && (
+                <div className="promoEmpty">
+                  Không tìm thấy khuyến mãi phù hợp.
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

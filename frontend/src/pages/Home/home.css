@@ -4,9 +4,28 @@
    HOME - FULL CSS (FIXED)
 ========================= */
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root,
+.home,
+.container,
+input,
+textarea,
+select,
+button {
+  font-family: "Times New Roman", Times, serif;
+}
+
 .home {
   background: #fff;
   padding: 18px 0 0;
+  color: #111827;
 }
 
 .container {
@@ -56,6 +75,7 @@
   color: rgba(255, 255, 255, 0.9);
   letter-spacing: 1px;
   margin-left: 60px;
+  font-family: "Times New Roman", Times, serif;
 }
 
 .slider__sub {
@@ -64,6 +84,7 @@
   color: rgba(255, 255, 255, 0.85);
   margin-top: 10px;
   margin-left: 60px;
+  font-family: "Times New Roman", Times, serif;
 }
 
 /* nav - mặc định ẩn */
@@ -83,6 +104,7 @@
   line-height: 1;
   padding: 0;
   z-index: 5;
+  font-family: "Times New Roman", Times, serif;
 
   display: flex;
   align-items: center;
@@ -158,6 +180,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  font-family: "Times New Roman", Times, serif;
 }
 
 .quick__img {
@@ -170,13 +193,14 @@
   margin-top: 10px;
   font-weight: 800;
   color: #111827;
+  font-size: 18px;
 }
 
 .quick__link {
   margin-top: 6px;
   color: #2563eb;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 /* ---------- PROMO ---------- */
@@ -217,6 +241,7 @@
   letter-spacing: 0.3px;
   font-size: 22px;
   text-transform: uppercase;
+  font-family: "Times New Roman", Times, serif;
 }
 
 /* timer */
@@ -235,6 +260,7 @@
   text-align: center;
   font-weight: 900;
   line-height: 1;
+  font-family: "Times New Roman", Times, serif;
 }
 
 .tbox__num {
@@ -267,6 +293,7 @@
   font-weight: 900;
   display: grid;
   place-items: center;
+  font-family: "Times New Roman", Times, serif;
 }
 
 .promo_text {
@@ -274,6 +301,7 @@
   font-weight: 900;
   margin-top: -13px;
   margin-left: -6px;
+  font-family: "Times New Roman", Times, serif;
 }
 
 .promo__navBtn:hover {
@@ -326,6 +354,7 @@
   border: 1px solid #e5e7eb;
   overflow: hidden;
   position: relative;
+  font-family: "Times New Roman", Times, serif;
 }
 
 .card--blue {
@@ -349,6 +378,7 @@
   color: #fff;
   background: #ef4444;
   padding: 6px 8px;
+  font-family: "Times New Roman", Times, serif;
 }
 
 .badge--corner {
@@ -367,9 +397,10 @@
 .card__name {
   padding: 10px 10px 0;
   font-weight: 800;
-  font-size: 12px;
+  font-size: 14px;
   min-height: 40px;
   color: #111827;
+  font-family: "Times New Roman", Times, serif;
 }
 
 .card__price {
@@ -382,13 +413,15 @@
 .price {
   color: #dc2626;
   font-weight: 900;
-  font-size: 13px;
+  font-size: 15px;
+  font-family: "Times New Roman", Times, serif;
 }
 
 .old {
   color: #9ca3af;
   text-decoration: line-through;
-  font-size: 12px;
+  font-size: 13px;
+  font-family: "Times New Roman", Times, serif;
 }
 
 /* ---------- BEST SELLER HEAD ---------- */
@@ -402,7 +435,8 @@
 .block__title2 {
   font-weight: 900;
   color: #111827;
-  font-size: 16px;
+  font-size: 22px;
+  font-family: "Times New Roman", Times, serif;
 }
 
 .nav2 {
@@ -422,6 +456,7 @@
   justify-content: center;
   font-size: 18px;
   line-height: 1;
+  font-family: "Times New Roman", Times, serif;
 }
 
 /* footer button */
@@ -445,6 +480,7 @@
   justify-content: center;
   gap: 10px;
   text-decoration: none;
+  font-family: "Times New Roman", Times, serif;
 }
 
 .promo__allIcon {
@@ -455,30 +491,40 @@
   display: grid;
   place-items: center;
   font-weight: 900;
+  font-family: "Times New Roman", Times, serif;
 }
 
+/* =========================
+   ADD TO CART
+========================= */
 /* =========================
    ADD TO CART
 ========================= */
 .home-actions {
   margin: 10px 10px 12px;
   display: flex;
+  justify-content: center;
 }
 
 .p-addcart {
   width: 100%;
+  min-width: 136px;
   height: 44px;
   border-radius: 999px;
   border: 1px solid #d9d9d9;
   background: #fff;
   color: #111;
   cursor: pointer;
+
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 6px 0 18px;
+  justify-content: center;
+  gap: 10px;
+
+  padding: 0 10px 0 14px;
   transition: box-shadow 0.15s ease, transform 0.15s ease,
     border-color 0.15s ease;
+  font-family: "Times New Roman", Times, serif;
 }
 
 .p-addcart:hover {
@@ -493,23 +539,28 @@
 }
 
 .p-addcart__label {
+  flex: 0 1 auto;
   font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 0.3px;
+  font-size: 12px;
+  letter-spacing: 0.2px;
   white-space: nowrap;
-  margin-left: -10px;
+  margin-left: 0;
+  line-height: 1;
+  font-family: "Times New Roman", Times, serif;
 }
 
 .p-addcart__icon {
-  width: 34px;
-  height: 34px;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
   border-radius: 999px;
   background: #1f4ed8;
   color: #fff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 14px;
+  font-family: "Times New Roman", Times, serif;
 }
 
 .p-addcart.is-out,
@@ -527,18 +578,35 @@
 
 /* compact cho promo/best seller card */
 .p-addcart--compact {
-  height: 40px;
-  padding-left: 14px;
+  min-width: 150px;
+  height: 42px;
+  padding: 0 10px 0 14px;
 }
 
 .p-addcart--compact .p-addcart__label {
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .p-addcart--compact .p-addcart__icon {
-  width: 30px;
-  height: 30px;
-  font-size: 14px;
+  width: 28px;
+  height: 28px;
+  flex-basis: 28px;
+  font-size: 13px;
+}
+
+/* ---------- FORM CHUNG ---------- */
+input,
+textarea,
+select,
+button {
+  font-family: "Times New Roman", Times, serif !important;
+}
+
+input,
+textarea,
+select {
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 /* ---------- RESPONSIVE ---------- */

@@ -1,3 +1,13 @@
+/* ===== GLOBAL FONT ===== */
+.blogPage,
+.blogPage * {
+  font-family: "Times New Roman", Times, serif;
+  box-sizing: border-box;
+}
+
+/* =========================
+   PAGE
+========================= */
 .blogPage {
   background: #fff;
   padding: 18px 0 40px;
@@ -11,12 +21,13 @@
   gap: 18px;
 }
 
-/* ===== LEFT: Tin tức ===== */
+/* ===== LEFT ===== */
 .blogTitle {
   margin: 0 0 14px;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 900;
   color: #111827;
+  letter-spacing: 0.3px;
 }
 
 .blogGrid {
@@ -25,9 +36,15 @@
   gap: 16px;
 }
 
+/* ===== CARD ===== */
 .postCard {
   border: 1px solid #ececec;
   background: #fff;
+  transition: 0.2s ease;
+}
+
+.postCard:hover {
+  transform: translateY(-2px);
 }
 
 .postCard__media {
@@ -35,6 +52,7 @@
   height: 170px;
   overflow: hidden;
 }
+
 .postCard__media img {
   width: 100%;
   height: 100%;
@@ -42,6 +60,7 @@
   display: block;
   transition: transform 0.25s ease;
 }
+
 .postCard:hover .postCard__media img {
   transform: scale(1.05);
 }
@@ -55,11 +74,13 @@
   color: #111827;
   font-weight: 900;
   text-decoration: none;
-  line-height: 1.35;
-  font-size: 13px;
+  line-height: 1.4;
+  font-size: 14px;
   margin-bottom: 8px;
   text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
+
 .postCard__heading:hover {
   color: #2563eb;
 }
@@ -67,8 +88,8 @@
 .postCard__excerpt {
   margin: 0 0 10px;
   color: #6b7280;
-  font-size: 12px;
-  line-height: 1.65;
+  font-size: 13px;
+  line-height: 1.7;
 }
 
 .postCard__meta {
@@ -76,10 +97,10 @@
   align-items: center;
   gap: 8px;
   color: #9ca3af;
-  font-size: 11px;
+  font-size: 12px;
 }
 
-/* pagination */
+/* ===== PAGINATION ===== */
 .blogPager {
   display: flex;
   align-items: center;
@@ -94,7 +115,9 @@
   background: #fff;
   cursor: pointer;
   font-size: 18px;
+  font-family: "Times New Roman", Times, serif;
 }
+
 .blogPager__btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -107,8 +130,10 @@
   background: #fff;
   cursor: pointer;
   font-weight: 800;
-  font-size: 12px;
+  font-size: 13px;
+  font-family: "Times New Roman", Times, serif;
 }
+
 .blogPager__num.isActive {
   background: #1f2a37;
   color: #fff;
@@ -122,21 +147,19 @@
   gap: 12px;
 }
 
-/* ===== Latest accordion card ===== */
-/* FIX QUAN TRỌNG: KHÔNG overflow hidden để badge 2/3/4 không bị cắt */
+/* ===== SIDE CARD ===== */
 .sideCard {
   border: 1px solid #ececec;
   border-radius: 6px;
   background: #fff;
 }
 
-/* header vẫn đẹp bo góc */
 .sideCard__head {
   width: 100%;
   background: #fff;
   border: 0;
   cursor: pointer;
-  padding: 18px 18px;
+  padding: 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -148,31 +171,30 @@
   color: #111827;
 }
 
-/* mũi tên xoay */
 .sideCard__chev {
   font-size: 20px;
   color: #6b7280;
-  line-height: 1;
   transform: rotate(0deg);
   transition: transform 0.18s ease;
-  user-select: none;
 }
+
 .sideCard__chev.isOpen {
   transform: rotate(180deg);
 }
 
-/* thu gọn/xổ mượt + CHO PHÉP badge lòi ra */
+/* ===== COLLAPSE ===== */
 .latestCollapse {
   height: 0;
-  overflow: visible;      /* ✅ quan trọng */
+  overflow: visible;
   border-top: 1px solid #eee;
   transition: height 0.28s ease;
 }
 
 .latestList {
-  padding: 10px 18px 8px 28px; /* ✅ chừa chỗ cho badge */
+  padding: 10px 18px 8px 28px;
 }
 
+/* ===== ITEM ===== */
 .latestItem {
   position: relative;
   display: grid;
@@ -200,8 +222,7 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 10px 22px rgba(31, 58, 138, 0.25);
-  transition: transform 0.2s ease;
-  z-index: 2; /* ✅ đè lên mọi thứ */
+  z-index: 2;
 }
 
 .latestItem__thumb {
@@ -211,29 +232,22 @@
   overflow: hidden;
   border-radius: 2px;
 }
+
 .latestItem__thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
-  transform: scale(1);
-  transition: transform 0.25s ease;
-}
-
-.latestItem__info {
-  min-width: 0;
 }
 
 .latestItem__title {
   font-weight: 800;
   color: #111827;
   font-size: 14px;
-  line-height: 1.25;
+  line-height: 1.3;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  transition: color 0.2s ease;
 }
 
 .latestItem__meta {
@@ -246,18 +260,17 @@
 .latestItem:hover .latestItem__title {
   color: #2563eb;
 }
+
 .latestItem:hover .latestItem__thumb img {
   transform: scale(1.06);
 }
-.latestItem:hover .latestItem__badge {
-  transform: translateY(-2px);
-}
 
-/* responsive */
+/* ===== RESPONSIVE ===== */
 @media (max-width: 980px) {
   .blogWrap {
     grid-template-columns: 1fr;
   }
+
   .blogGrid {
     grid-template-columns: 1fr;
   }

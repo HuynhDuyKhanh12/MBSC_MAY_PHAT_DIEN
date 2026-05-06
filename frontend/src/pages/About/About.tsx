@@ -1,24 +1,75 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import "./about.css";
 
+import { getProductsApi } from "../../api/modules/productApi";
+import { getBrandsApi } from "../../api/modules/brandApi";
+import { getCategoriesApi } from "../../api/modules/categoryApi";
+
 const HERO_IMG =
-  "https://images.unsplash.com/photo-1527979809431-9f985d18c8b2?q=80&w=1800&auto=format&fit=crop";
+  "https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=1800&q=80";
 
 const IMG_1 =
-  "https://images.unsplash.com/photo-1456324504439-367cee3b3c32?q=80&w=1400&auto=format&fit=crop";
+  "https://images.unsplash.com/photo-1581093588401-12f6d7c8b2e4?auto=format&fit=crop&w=1400&q=80";
+
 const IMG_2 =
-  "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=1400&auto=format&fit=crop";
+  "https://images.unsplash.com/photo-1581092919531-4d4a7d9e7e1e?auto=format&fit=crop&w=1400&q=80";
+
+function normalizeArrayResponse(res: any) {
+  if (Array.isArray(res)) return res;
+  if (Array.isArray(res?.data)) return res.data;
+  if (Array.isArray(res?.data?.data)) return res.data.data;
+  return [];
+}
 
 const About: React.FC = () => {
+  const [productCount, setProductCount] = useState(0);
+  const [brandCount, setBrandCount] = useState(0);
+  const [categoryCount, setCategoryCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const loadAboutData = async () => {
+      try {
+        setLoading(true);
+
+        const [productRes, brandRes, categoryRes] = await Promise.all([
+          getProductsApi(),
+          getBrandsApi(),
+          getCategoriesApi(),
+        ]);
+
+        const products = normalizeArrayResponse(productRes).filter(
+          (item: any) => !item.deletedAt
+        );
+
+        const brands = normalizeArrayResponse(brandRes).filter(
+          (item: any) => !item.deletedAt
+        );
+
+        const categories = normalizeArrayResponse(categoryRes).filter(
+          (item: any) => !item.deletedAt
+        );
+
+        setProductCount(products.length);
+        setBrandCount(brands.length);
+        setCategoryCount(categories.length);
+      } catch (error) {
+        console.log("Lỗi tải dữ liệu About:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAboutData();
+  }, []);
+
   return (
     <>
       <Header />
 
       <main className="about">
-
-        {/* HERO */}
         <section className="aboutHero">
           <div
             className="aboutHero__bg"
@@ -32,42 +83,38 @@ const About: React.FC = () => {
           </div>
         </section>
 
-        {/* CONTENT */}
         <section className="aboutSection">
           <div className="aboutContainer">
             <div className="aboutGrid2">
               <div className="aboutBlock">
                 <div className="aboutKicker">VỀ CHÚNG TÔI</div>
-                <h2 className="aboutHeading">THƯƠNG HIỆU FLYCAM24h</h2>
+                <h2 className="aboutHeading">MBSC MÁY PHÁT ĐIỆN</h2>
                 <p className="aboutText">
-                  Trong suốt 6 năm kể từ khi được thành lập, chúng tôi đã xây dựng
-                  hệ thống sản phẩm và dịch vụ chất lượng, tập trung vào trải
-                  nghiệm khách hàng: tư vấn rõ ràng, minh bạch thông số, bảo hành
-                  nhanh và hỗ trợ kỹ thuật tận tâm.
+                  Chúng tôi cung cấp máy phát điện, phụ kiện và dịch vụ bảo trì
+                  sửa chữa chuyên nghiệp. Dữ liệu sản phẩm, thương hiệu và danh
+                  mục được kết nối trực tiếp từ hệ thống backend.
                 </p>
                 <p className="aboutText">
-                  Mục tiêu của chúng tôi là mang đến giải pháp thiết bị bay, phụ
-                  kiện và dịch vụ sửa chữa chuyên nghiệp, giúp bạn an tâm sử dụng
-                  trong công việc và đam mê.
+                  Mục tiêu của chúng tôi là mang đến sản phẩm chính hãng, tư vấn
+                  rõ ràng, bảo hành nhanh và hỗ trợ kỹ thuật tận tâm.
                 </p>
               </div>
 
               <div className="aboutBlock">
                 <div className="aboutKicker">TẦM NHÌN</div>
-                <h2 className="aboutHeading">ĐỒNG HÀNH CÙNG BẠN</h2>
+                <h2 className="aboutHeading">ĐỒNG HÀNH CÙNG KHÁCH HÀNG</h2>
                 <p className="aboutText">
-                  Với đội ngũ kỹ thuật và tư vấn giàu kinh nghiệm, chúng tôi luôn
-                  cập nhật sản phẩm mới, tối ưu quy trình bảo hành – sửa chữa,
-                  đảm bảo thời gian xử lý nhanh và chất lượng ổn định.
+                  Với đội ngũ kỹ thuật giàu kinh nghiệm, chúng tôi luôn tối ưu
+                  quy trình bán hàng, bảo trì và sửa chữa để khách hàng yên tâm
+                  sử dụng.
                 </p>
                 <p className="aboutText">
-                  Chúng tôi tin rằng sự uy tín và dịch vụ hậu mãi chính là nền
-                  tảng tạo nên thương hiệu lâu dài.
+                  Uy tín, chất lượng và dịch vụ hậu mãi là nền tảng phát triển
+                  lâu dài của MBSC.
                 </p>
               </div>
             </div>
 
-            {/* Story row 1: Ảnh trái - chữ phải */}
             <div className="aboutStory">
               <div className="aboutStory__imgWrap">
                 <div
@@ -80,33 +127,31 @@ const About: React.FC = () => {
                 <div className="aboutKicker">THÔNG ĐIỆP TỪ CHÚNG TÔI</div>
                 <h3 className="aboutHeading2">Câu chuyện thương hiệu</h3>
                 <p className="aboutText">
-                  Chúng tôi bắt đầu từ niềm yêu thích công nghệ và mong muốn đem
-                  sản phẩm chính hãng đến gần hơn với người dùng. Từ đó phát triển
-                  hệ thống bán hàng – dịch vụ sửa chữa, cung cấp giải pháp trọn
-                  gói cho khách hàng cá nhân và doanh nghiệp.
+                  MBSC bắt đầu từ nhu cầu cung cấp giải pháp máy phát điện ổn
+                  định cho gia đình, công trình và doanh nghiệp.
                 </p>
                 <p className="aboutText">
                   <strong>Thương hiệu Việt, dịch vụ chuyên nghiệp.</strong>
                 </p>
-                <div className="aboutMeta">Thành lập: 2020</div>
+                <div className="aboutMeta">Cam kết: Uy tín – Tận tâm</div>
               </div>
             </div>
 
-            {/* Story row 2: chữ trái - Ảnh phải */}
             <div className="aboutStory isReverse">
               <div className="aboutStory__content">
-                <div className="aboutKicker">THÔNG ĐIỆP TỪ CHÚNG TÔI</div>
-                <h3 className="aboutHeading2">Câu chuyện thương hiệu</h3>
+                <div className="aboutKicker">DỮ LIỆU HỆ THỐNG</div>
+                <h3 className="aboutHeading2">Kết nối backend</h3>
                 <p className="aboutText">
-                  Chúng tôi đặt trải nghiệm khách hàng lên hàng đầu: tư vấn đúng
-                  nhu cầu, hướng dẫn sử dụng rõ ràng, linh kiện chuẩn và quy trình
-                  bảo hành minh bạch.
+                  Trang giới thiệu này đã kết nối API để lấy số lượng sản phẩm,
+                  thương hiệu và danh mục từ database.
                 </p>
                 <p className="aboutText">
-                  Mỗi sản phẩm bán ra đều kèm theo cam kết hỗ trợ kỹ thuật trong
-                  suốt quá trình sử dụng.
+                  Khi admin thêm sản phẩm, thương hiệu hoặc danh mục, số liệu ở
+                  đây sẽ tự cập nhật.
                 </p>
-                <div className="aboutMeta">Cam kết: Uy tín – Tận tâm</div>
+                <div className="aboutMeta">
+                  {loading ? "Đang tải dữ liệu..." : "Dữ liệu đã kết nối API"}
+                </div>
               </div>
 
               <div className="aboutStory__imgWrap">
@@ -117,37 +162,42 @@ const About: React.FC = () => {
               </div>
             </div>
 
-            {/* Stats */}
             <div className="aboutStats">
               <div className="aboutStat">
-                <div className="aboutStat__icon">✦</div>
-                <div className="aboutStat__title">Đổi trả, hoàn tiền</div>
+                <div className="aboutStat__icon">⚙️</div>
+                <div className="aboutStat__title">
+                  {loading ? "..." : productCount} sản phẩm
+                </div>
                 <div className="aboutStat__desc">
-                  Chính sách rõ ràng, hỗ trợ nhanh.
+                  Sản phẩm lấy trực tiếp từ backend.
                 </div>
               </div>
 
               <div className="aboutStat">
-                <div className="aboutStat__icon">⛨</div>
-                <div className="aboutStat__title">Chính sách bảo mật</div>
+                <div className="aboutStat__icon">🏷️</div>
+                <div className="aboutStat__title">
+                  {loading ? "..." : brandCount} thương hiệu
+                </div>
                 <div className="aboutStat__desc">
-                  Bảo vệ thông tin khách hàng.
+                  Thương hiệu được quản lý trong admin.
+                </div>
+              </div>
+
+              <div className="aboutStat">
+                <div className="aboutStat__icon">📂</div>
+                <div className="aboutStat__title">
+                  {loading ? "..." : categoryCount} danh mục
+                </div>
+                <div className="aboutStat__desc">
+                  Danh mục đồng bộ từ database.
                 </div>
               </div>
 
               <div className="aboutStat">
                 <div className="aboutStat__icon">☎</div>
-                <div className="aboutStat__title">Hỗ trợ khách hàng 24/7</div>
+                <div className="aboutStat__title">Hỗ trợ 24/7</div>
                 <div className="aboutStat__desc">
-                  Tư vấn nhanh qua hotline & chat.
-                </div>
-              </div>
-
-              <div className="aboutStat">
-                <div className="aboutStat__icon">★</div>
-                <div className="aboutStat__title">Thương hiệu tin chọn</div>
-                <div className="aboutStat__desc">
-                  Hàng chính hãng, bảo hành chuẩn.
+                  Tư vấn nhanh qua hotline và chat.
                 </div>
               </div>
             </div>

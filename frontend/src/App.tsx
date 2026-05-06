@@ -115,7 +115,7 @@ function App() {
         {/* USER */}
         <Route path="/" element={<Home />} />
         <Route path="/productlist" element={<ProductList />} />
-        <Route path="/productlist/:id" element={<ProductDetail />} />
+        <Route path="/san-pham/:id" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/promotions" element={<Promotions />} />
         <Route path="/about" element={<About />} />

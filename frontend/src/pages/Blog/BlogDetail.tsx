@@ -1,114 +1,222 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import "./blog-detail.css";
+import { getBlogByIdApi, getBlogsApi } from "../../api/modules/blogApi";
 
 type BlogPost = {
   id: number;
   title: string;
   image: string;
-  date: string; // "17 Tháng 06, 2022"
+  date: string;
   category?: string;
-  contentHtml: string; // nội dung bài viết (HTML)
+  contentHtml: string;
+  excerpt?: string;
 };
 
+const API_URL = "http://localhost:5000";
+
 const FALLBACK_IMG =
-  "https://images.unsplash.com/photo-1527979809431-9f985d18c8b2?q=80&w=1600&auto=format&fit=crop";
+  "https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=1600&q=80";
+
+const DEFAULT_POSTS: BlogPost[] = [
+  {
+    id: 1,
+    title: "Cách chọn máy phát điện phù hợp cho gia đình",
+    image:
+      "https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=1400&q=80",
+    date: "2026-04-01",
+    category: "Hướng dẫn",
+    excerpt:
+      "Hướng dẫn chọn công suất máy phát điện phù hợp với nhu cầu sử dụng.",
+    contentHtml: `
+      <p>Máy phát điện gia đình cần chọn đúng công suất để đảm bảo hoạt động ổn định và tiết kiệm nhiên liệu.</p>
+      <h2>1. Xác định thiết bị cần dùng</h2>
+      <p>Bạn nên liệt kê các thiết bị như đèn, quạt, tủ lạnh, máy bơm, máy lạnh...</p>
+      <h2>2. Chọn công suất dư</h2>
+      <p>Nên chọn máy có công suất dư khoảng 20% - 30% so với tổng tải sử dụng.</p>
+    `,
+  },
+  {
+    id: 2,
+    title: "Bao lâu nên bảo trì máy phát điện một lần?",
+    image:
+      "https://images.unsplash.com/photo-1581093588401-12f6d7c8b2e4?auto=format&fit=crop&w=1400&q=80",
+    date: "2026-04-05",
+    category: "Bảo trì",
+    excerpt: "Bảo trì định kỳ giúp máy phát điện hoạt động ổn định.",
+    contentHtml: `
+      <p>Bảo trì máy phát điện định kỳ giúp tăng tuổi thọ máy và tránh hư hỏng nặng.</p>
+      <h2>1. Kiểm tra dầu nhớt</h2>
+      <p>Dầu nhớt cần được thay đúng thời gian khuyến nghị của nhà sản xuất.</p>
+      <h2>2. Kiểm tra lọc gió và bugi</h2>
+      <p>Lọc gió bẩn hoặc bugi yếu có thể làm máy khó nổ.</p>
+    `,
+  },
+  {
+    id: 3,
+    title: "Dấu hiệu máy phát điện cần được kiểm tra ngay",
+    image:
+      "https://images.unsplash.com/photo-1581092919531-4d4a7d9e7e1e?auto=format&fit=crop&w=1400&q=80",
+    date: "2026-04-10",
+    category: "Sửa chữa",
+    excerpt: "Máy khó nổ, điện áp yếu hoặc tiếng máy lạ là dấu hiệu cần kiểm tra.",
+    contentHtml: `
+      <p>Khi máy phát điện có dấu hiệu bất thường, bạn nên kiểm tra sớm để tránh lỗi nặng hơn.</p>
+      <h2>Dấu hiệu thường gặp</h2>
+      <ul>
+        <li>Máy khó khởi động</li>
+        <li>Điện áp không ổn định</li>
+        <li>Máy phát tiếng kêu lạ</li>
+        <li>Hao nhiên liệu bất thường</li>
+      </ul>
+    `,
+  },
+  {
+    id: 4,
+    title: "Nên chọn máy phát điện xăng hay dầu?",
+    image:
+      "https://images.unsplash.com/photo-1581091215367-59e0a46fe7dd?auto=format&fit=crop&w=1400&q=80",
+    date: "2026-04-15",
+    category: "Tư vấn",
+    excerpt: "So sánh ưu nhược điểm giữa máy phát điện xăng và dầu.",
+    contentHtml: `
+      <p>Máy phát điện xăng thường phù hợp gia đình nhỏ, còn máy dầu phù hợp công suất lớn và chạy lâu.</p>
+      <h2>Máy xăng</h2>
+      <p>Dễ khởi động, tiếng ồn thấp hơn, phù hợp nhu cầu nhỏ.</p>
+      <h2>Máy dầu</h2>
+      <p>Bền, tiết kiệm nhiên liệu hơn khi chạy công suất lớn.</p>
+    `,
+  },
+];
+
+function normalizeArrayResponse(res: any) {
+  if (Array.isArray(res)) return res;
+  if (Array.isArray(res?.data)) return res.data;
+  if (Array.isArray(res?.data?.data)) return res.data.data;
+  return [];
+}
+
+function normalizeObjectResponse(res: any) {
+  return res?.data?.data || res?.data || res || null;
+}
+
+function getImageSrc(image?: string) {
+  if (!image || !String(image).trim()) return FALLBACK_IMG;
+
+  const value = String(image).trim();
+
+  if (value.startsWith("http://") || value.startsWith("https://")) return value;
+  if (value.startsWith("/uploads/")) return `${API_URL}${value}`;
+  if (value.startsWith("uploads/")) return `${API_URL}/${value}`;
+  if (value.startsWith("/")) return `${API_URL}${value}`;
+
+  return value;
+}
+
+function formatDateDot(s: string) {
+  if (!s) return "Chưa có ngày";
+
+  const date = new Date(s);
+
+  if (!Number.isNaN(date.getTime())) {
+    return date.toLocaleDateString("vi-VN").replaceAll("/", ".");
+  }
+
+  const m = s.match(/(\d{1,2}).*?(\d{1,2}).*?(\d{4})/);
+  if (!m) return s;
+
+  const dd = m[1].padStart(2, "0");
+  const mm = m[2].padStart(2, "0");
+  const yy = m[3];
+
+  return `${dd}.${mm}.${yy}`;
+}
+
+function mapApiBlog(item: any): BlogPost {
+  return {
+    id: Number(item.id),
+    title: item.title || item.name || "Không có tiêu đề",
+    image: getImageSrc(item.image || item.thumbnail || item.cover),
+    date: item.createdAt || item.updatedAt || item.date || "Chưa có ngày",
+    category: item.category?.name || item.category || "Tin tức",
+    excerpt:
+      item.excerpt ||
+      item.shortDescription ||
+      item.description ||
+      "Chưa có mô tả bài viết.",
+    contentHtml:
+      item.contentHtml ||
+      item.content ||
+      item.description ||
+      item.excerpt ||
+      "Chưa có nội dung bài viết.",
+  };
+}
 
 const BlogDetail: React.FC = () => {
   const { id } = useParams();
   const postId = Number(id);
 
-  // ✅ TẠM: dữ liệu mock (sau này bạn lấy API)
-  const posts: BlogPost[] = useMemo(
-    () => [
-      {
-        id: 1,
-        title: "Hướng dẫn cách tạo mục lục bài viết",
-        image:
-          "https://images.unsplash.com/photo-1520975958225-2b4f1f8b4a36?q=80&w=1600&auto=format&fit=crop",
-        date: "17 Tháng 06, 2022",
-        category: "Tin tức",
-        contentHtml: `
-          <p>Trong bài viết này, tôi sẽ hướng dẫn bạn cách tạo mục lục bài viết siêu đơn giản...</p>
-          <h2>1. Lợi ích của việc tạo mục lục</h2>
-          <ul>
-            <li>Giúp người đọc dễ theo dõi</li>
-            <li>Tối ưu trải nghiệm</li>
-            <li>Hỗ trợ SEO tốt hơn</li>
-          </ul>
-          <h2>2. Cách tạo mục lục bài viết</h2>
-          <p>Bạn có thể dùng plugin hoặc tự code...</p>
-          <blockquote>Mẹo: hãy đặt các heading H2/H3 hợp lý.</blockquote>
-          <h2>3. Tùy chỉnh mục lục</h2>
-          <p>Thêm style, highlight mục đang đọc...</p>
-        `,
-      },
-      {
-        id: 2,
-        title: "Đánh giá DJI Air 2S: Nâng cấp nổi bật, góc quay vượt trội",
-        image:
-          "https://images.unsplash.com/photo-1508615070457-7baeba4003ab?q=80&w=1600&auto=format&fit=crop",
-        date: "23 Tháng 05, 2022",
-        category: "Tin tức",
-        contentHtml: `
-          <p>DJI Air 2S mang đến cảm biến lớn hơn, quay 5.4K, chống rung tốt...</p>
-          <h2>Thông số nổi bật</h2>
-          <ul><li>Quay 5.4K</li><li>Cảm biến 1 inch</li><li>ActiveTrack</li></ul>
-          <h2>Trải nghiệm thực tế</h2>
-          <p>Bay ổn định, pin tốt, chất lượng hình ảnh vượt trội...</p>
-        `,
-      },
-      {
-        id: 3,
-        title: "So sánh DJI Air 2S và DJI Mavic 2 Pro: Đánh giá flycam nào tốt hơn?",
-        image:
-          "https://images.unsplash.com/photo-1527443154391-507e9dc6c5cc?q=80&w=1600&auto=format&fit=crop",
-        date: "23 Tháng 05, 2022",
-        category: "Tin tức",
-        contentHtml: `
-          <p>Cả Air 2S và Mavic 2 Pro đều mạnh, nhưng khác nhau về cảm biến, giá và tính năng.</p>
-          <h2>So sánh nhanh</h2>
-          <p>Air 2S: nhẹ, mới, giá tốt. Mavic 2 Pro: cảm biến Hasselblad...</p>
-        `,
-      },
-      {
-        id: 4,
-        title: "Hướng dẫn làm thủ tục xin giấy phép bay flycam tại Việt Nam",
-        image:
-          "https://images.unsplash.com/photo-1508614589041-895b88991e3e?q=80&w=1600&auto=format&fit=crop",
-        date: "23 Tháng 05, 2022",
-        category: "Tin tức",
-        contentHtml: `
-          <p>Để xin giấy phép bay flycam bạn cần chuẩn bị hồ sơ, bản đồ khu vực bay...</p>
-          <h2>Hồ sơ cần có</h2>
-          <ul><li>Đơn xin phép</li><li>CMND/CCCD</li><li>Bản đồ khu vực</li></ul>
-          <h2>Nộp hồ sơ ở đâu?</h2>
-          <p>Tuỳ khu vực, bạn nộp theo hướng dẫn cơ quan chức năng...</p>
-        `,
-      },
-    ],
-    []
-  );
-
-  const post = posts.find((p) => p.id === postId);
-
-  const formatDateDot = (s: string) => {
-    const m = s.match(/(\d{1,2}).*?(\d{1,2}).*?(\d{4})/);
-    if (!m) return s;
-    const dd = m[1].padStart(2, "0");
-    const mm = m[2].padStart(2, "0");
-    const yy = m[3];
-    return `${dd}.${mm}.${yy}`;
-  };
-
-  // sidebar newest accordion
-  const newestOptions = posts.slice(0, 6);
+  const [post, setPost] = useState<BlogPost | null>(null);
+  const [posts, setPosts] = useState<BlogPost[]>(DEFAULT_POSTS);
+  const [loading, setLoading] = useState(false);
   const [latestOpen, setLatestOpen] = useState(true);
 
-  // related posts (3 bài khác)
-  const related = posts.filter((p) => p.id !== postId).slice(0, 3);
+  useEffect(() => {
+    const loadBlogDetail = async () => {
+      try {
+        setLoading(true);
+
+        const [detailRes, listRes] = await Promise.all([
+          getBlogByIdApi(postId),
+          getBlogsApi(),
+        ]);
+
+        const detailData = normalizeObjectResponse(detailRes);
+        const listData = normalizeArrayResponse(listRes)
+          .filter((item: any) => !item.deletedAt)
+          .map(mapApiBlog);
+
+        setPost(detailData ? mapApiBlog(detailData) : null);
+        setPosts(listData.length > 0 ? listData : DEFAULT_POSTS);
+      } catch (error) {
+        console.log("Backend chưa có API blog detail, dùng data mẫu:", error);
+
+        const found = DEFAULT_POSTS.find((p) => p.id === postId) || null;
+        setPost(found);
+        setPosts(DEFAULT_POSTS);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (Number.isFinite(postId)) {
+      loadBlogDetail();
+    }
+  }, [postId]);
+
+  const newestOptions = useMemo(() => posts.slice(0, 6), [posts]);
+
+  const related = useMemo(() => {
+    if (!post) return [];
+    return posts.filter((p) => p.id !== post.id).slice(0, 3);
+  }, [posts, post]);
+
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <main className="bdPage">
+          <div className="bdWrap">
+            <h1 className="bdTitle">Đang tải bài viết...</h1>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   if (!post) {
     return (
@@ -134,9 +242,9 @@ const BlogDetail: React.FC = () => {
       <main className="bdPage">
         <div className="bdWrap">
           <div className="bdGrid">
-            {/* LEFT: content */}
             <article className="bdMain">
               <h1 className="bdH1">{post.title}</h1>
+
               <div className="bdMeta">
                 <span>{post.category ?? "Tin tức"}</span>
                 <span>•</span>
@@ -148,22 +256,20 @@ const BlogDetail: React.FC = () => {
                   src={post.image}
                   alt={post.title}
                   onError={(e) => {
-                    const img = e.currentTarget;
-                    img.onerror = null;
-                    img.src = FALLBACK_IMG;
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = FALLBACK_IMG;
                   }}
                 />
               </div>
 
-              {/* Nội dung bài viết */}
               <div
                 className="bdContent"
                 dangerouslySetInnerHTML={{ __html: post.contentHtml }}
               />
 
-              {/* Related */}
               <section className="bdRelated">
                 <div className="bdRelated__head">Bài viết liên quan</div>
+
                 <div className="bdRelated__grid">
                   {related.map((r) => (
                     <Link key={r.id} to={`/blog/${r.id}`} className="relCard">
@@ -172,13 +278,14 @@ const BlogDetail: React.FC = () => {
                           src={r.image}
                           alt={r.title}
                           onError={(e) => {
-                            const img = e.currentTarget;
-                            img.onerror = null;
-                            img.src = FALLBACK_IMG;
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = FALLBACK_IMG;
                           }}
                         />
                       </div>
+
                       <div className="relCard__title">{r.title}</div>
+
                       <div className="relCard__meta">
                         {r.category ?? "Tin tức"} - {formatDateDot(r.date)}
                       </div>
@@ -188,7 +295,6 @@ const BlogDetail: React.FC = () => {
               </section>
             </article>
 
-            {/* RIGHT: sidebar newest */}
             <aside className="bdSide">
               <div className="sideCard">
                 <button
@@ -197,7 +303,9 @@ const BlogDetail: React.FC = () => {
                   onClick={() => setLatestOpen((v) => !v)}
                 >
                   <span className="sideCard__title">Bài viết mới nhất</span>
-                  <span className={`sideCard__chev ${latestOpen ? "isOpen" : ""}`}>
+                  <span
+                    className={`sideCard__chev ${latestOpen ? "isOpen" : ""}`}
+                  >
                     ⌄
                   </span>
                 </button>
@@ -205,7 +313,11 @@ const BlogDetail: React.FC = () => {
                 {latestOpen && (
                   <div className="latestList">
                     {newestOptions.slice(0, 4).map((p, idx) => (
-                      <Link key={p.id} className="latestItem" to={`/blog/${p.id}`}>
+                      <Link
+                        key={p.id}
+                        className="latestItem"
+                        to={`/blog/${p.id}`}
+                      >
                         <span className="latestItem__badge">{idx + 1}</span>
 
                         <div className="latestItem__thumb">
@@ -213,9 +325,8 @@ const BlogDetail: React.FC = () => {
                             src={p.image}
                             alt={p.title}
                             onError={(e) => {
-                              const img = e.currentTarget;
-                              img.onerror = null;
-                              img.src = FALLBACK_IMG;
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = FALLBACK_IMG;
                             }}
                           />
                         </div>

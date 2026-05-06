@@ -1,7 +1,13 @@
-import React, { useMemo, useState, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+
 import "./cart.css";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
+import {
+  getCartApi,
+  updateCartItemApi,
+  deleteCartItemApi,
+} from "../../api/modules/cartApi";
 
 type CartItem = {
   id: number;
@@ -15,36 +21,6 @@ type CartItem = {
 
 type DeliveryMode = "store" | "time";
 
-const formatVND = (n: number) =>
-  n.toLocaleString("vi-VN", { maximumFractionDigits: 0 }) + "₫";
-
-const FALLBACK_IMG =
-  "https://images.unsplash.com/photo-1520975958225-2b4f1f8b4a36?auto=format&fit=crop&w=800&q=80";
-
-// dd/MM/yyyy
-const formatDateVN = (d: Date) => {
-  const dd = String(d.getDate()).padStart(2, "0");
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const yyyy = d.getFullYear();
-  return `${dd}/${mm}/${yyyy}`;
-};
-
-// cộng ngày an toàn
-const addDays = (base: Date, days: number) => {
-  const d = new Date(base);
-  d.setHours(12, 0, 0, 0);
-  d.setDate(d.getDate() + days);
-  return d;
-};
-
-// key yyyy-mm-dd
-const dateKey = (d: Date) => {
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
-};
-
 type Promo = {
   id: string;
   title: string;
@@ -54,45 +30,104 @@ type Promo = {
   icon: string;
 };
 
+const API_URL = "http://localhost:5000";
+
+const FALLBACK_IMG =
+  "https://images.unsplash.com/photo-1520975958225-2b4f1f8b4a36?auto=format&fit=crop&w=800&q=80";
+
+const formatVND = (n: number) =>
+  Number(n || 0).toLocaleString("vi-VN", { maximumFractionDigits: 0 }) + "₫";
+
+const formatDateVN = (d: Date) => {
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yyyy = d.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
+};
+
+const addDays = (base: Date, days: number) => {
+  const d = new Date(base);
+  d.setHours(12, 0, 0, 0);
+  d.setDate(d.getDate() + days);
+  return d;
+};
+
+const dateKey = (d: Date) => {
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+};
+
 const chunk = <T,>(arr: T[], size: number) => {
   const out: T[][] = [];
   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
   return out;
 };
 
+function getImageSrc(image?: string) {
+  if (!image || !String(image).trim()) return FALLBACK_IMG;
+
+  const value = String(image).trim();
+
+  if (value.startsWith("data:image/")) return value;
+  if (value.startsWith("http://") || value.startsWith("https://")) return value;
+  if (value.startsWith("/uploads/")) return `${API_URL}${value}`;
+  if (value.startsWith("uploads/")) return `${API_URL}/${value}`;
+  if (value.startsWith("/")) return `${API_URL}${value}`;
+
+  return `${API_URL}/uploads/${value}`;
+}
+
+function normalizeCartResponse(res: any) {
+  return res?.data?.data || res?.data || res || {};
+}
+
+function mapCartItem(item: any): CartItem {
+  const product = item.product || {};
+  const variant = item.variant || {};
+
+  const price =
+    Number(item.unitPrice) ||
+    Number(item.price) ||
+    Number(variant.price) ||
+    Number(product.salePrice) ||
+    Number(product.basePrice) ||
+    0;
+
+  const oldPrice =
+    product.salePrice && product.basePrice && Number(product.basePrice) > price
+      ? Number(product.basePrice)
+      : undefined;
+
+  return {
+    id: Number(item.id),
+    name: product.name || item.productName || item.name || "Sản phẩm",
+    variant: variant.name || variant.sku || item.variantName || "",
+    image: getImageSrc(
+      product.thumbnail ||
+        product.image ||
+        product.images?.[0]?.url ||
+        product.images?.[0]?.imageUrl ||
+        item.image
+    ),
+    price,
+    oldPrice,
+    qty: Number(item.quantity || item.qty || 1),
+  };
+}
+
 const Cart: React.FC = () => {
-  // ✅ REF cho scroll khuyến mãi (dạng trang)
   const promoRef = useRef<HTMLDivElement | null>(null);
 
-  // ✅ scroll theo “1 trang” (bằng đúng chiều ngang khung)
-  const scrollPromo = (dir: "left" | "right") => {
-    if (!promoRef.current) return;
-    const w = promoRef.current.clientWidth; // 1 page
-    promoRef.current.scrollBy({
-      left: dir === "left" ? -w : w,
-      behavior: "smooth",
-    });
-  };
-
-  const [items, setItems] = useState<CartItem[]>([
-    {
-      id: 1,
-      name: "Phantom 4 Multispectral",
-      variant: "(Chính hãng)",
-      image:
-        "https://images.unsplash.com/photo-1524143986875-3b6f7f9c7b5e?auto=format&fit=crop&w=900&q=80",
-      price: 34000000,
-      oldPrice: 35000000,
-      qty: 2,
-    },
-  ]);
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [updatingId, setUpdatingId] = useState<number | null>(null);
 
   const [note, setNote] = useState("");
   const [needInvoice, setNeedInvoice] = useState(false);
-
   const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>("store");
 
-  // 3 ngày liên tiếp, hiển thị dd/MM/yyyy
   const deliveryDays = useMemo(() => {
     const now = new Date();
     const d0 = addDays(now, 0);
@@ -106,17 +141,14 @@ const Cart: React.FC = () => {
     ];
   }, []);
 
-  // mặc định chọn hôm nay
-  const [deliveryDayKey, setDeliveryDayKey] = useState<string>(() => {
-    const now = new Date();
-    return dateKey(addDays(now, 0));
-  });
+  const [deliveryDayKey, setDeliveryDayKey] = useState<string>(() =>
+    dateKey(addDays(new Date(), 0))
+  );
 
   const [deliverySlot, setDeliverySlot] = useState("08:00-09:00");
   const [confirmed, setConfirmed] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
-  // ✅ nhiều khuyến mãi hơn
   const promotions = useMemo<Promo[]>(
     () => [
       {
@@ -167,28 +199,44 @@ const Cart: React.FC = () => {
         exp: "12/05/2026",
         icon: "🎁",
       },
-      {
-        id: "MEMBER5",
-        title: "Thành viên giảm 5%",
-        desc: "Chỉ áp dụng tài khoản thành viên",
-        code: "MEMBER5",
-        exp: "31/05/2026",
-        icon: "👑",
-      },
-      {
-        id: "WEEKEND",
-        title: "Cuối tuần giảm 8%",
-        desc: "Thứ 7 & CN",
-        code: "WKND8",
-        exp: "30/06/2026",
-        icon: "🗓️",
-      },
     ],
     []
   );
 
-  // ✅ mỗi “trang” 2 khuyến mãi (xếp dọc giống hình)
   const promoPages = useMemo(() => chunk(promotions, 2), [promotions]);
+
+  const loadCart = async () => {
+    try {
+      setLoading(true);
+
+      const res = await getCartApi();
+      const data = normalizeCartResponse(res);
+
+      const cartItems = Array.isArray(data?.items)
+        ? data.items
+        : Array.isArray(data?.cartItems)
+        ? data.cartItems
+        : Array.isArray(data)
+        ? data
+        : [];
+
+      setItems(cartItems.map(mapCartItem));
+    } catch (error: any) {
+      console.log("Lỗi load cart:", error?.response?.data || error);
+
+      if (error?.response?.status === 401) {
+        alert("Bạn cần đăng nhập để xem giỏ hàng");
+      }
+
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadCart();
+  }, []);
 
   const subtotal = useMemo(
     () => items.reduce((sum, it) => sum + it.price * it.qty, 0),
@@ -200,16 +248,59 @@ const Cart: React.FC = () => {
     [items]
   );
 
-  const updateQty = (id: number, nextQty: number) => {
-    setItems((prev) =>
-      prev
-        .map((it) => (it.id === id ? { ...it, qty: Math.max(1, nextQty) } : it))
-        .filter((it) => it.qty > 0)
-    );
+  const scrollPromo = (dir: "left" | "right") => {
+    if (!promoRef.current) return;
+
+    const w = promoRef.current.clientWidth;
+    promoRef.current.scrollBy({
+      left: dir === "left" ? -w : w,
+      behavior: "smooth",
+    });
   };
 
-  const removeItem = (id: number) => {
-    setItems((prev) => prev.filter((it) => it.id !== id));
+  const updateQty = async (id: number, nextQty: number) => {
+    if (nextQty < 1) return;
+
+    try {
+      setUpdatingId(id);
+
+      await updateCartItemApi(id, nextQty);
+
+      setItems((prev) =>
+        prev.map((it) => (it.id === id ? { ...it, qty: nextQty } : it))
+      );
+    } catch (error: any) {
+      console.log("Lỗi cập nhật số lượng:", error?.response?.data || error);
+      alert(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Cập nhật số lượng thất bại"
+      );
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const removeItem = async (id: number) => {
+    const ok = window.confirm("Bạn có chắc muốn xoá sản phẩm này khỏi giỏ?");
+    if (!ok) return;
+
+    try {
+      setUpdatingId(id);
+
+      await deleteCartItemApi(id);
+
+      setItems((prev) => prev.filter((it) => it.id !== id));
+    } catch (error: any) {
+      console.log("Lỗi xoá cart:", error?.response?.data || error);
+      alert(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Xoá sản phẩm thất bại"
+      );
+    } finally {
+      setUpdatingId(null);
+    }
   };
 
   const copyCode = async (code: string) => {
@@ -223,9 +314,14 @@ const Cart: React.FC = () => {
 
   const onConfirmTime = () => {
     setConfirmed(true);
+
     const picked = deliveryDays.find((d) => d.key === deliveryDayKey);
+
     alert(
-      `Đã xác nhận: ${picked?.label ?? ""} - ${deliverySlot.replace("-", " - ")}`
+      `Đã xác nhận: ${picked?.label ?? ""} - ${deliverySlot.replace(
+        "-",
+        " - "
+      )}`
     );
   };
 
@@ -233,7 +329,7 @@ const Cart: React.FC = () => {
     if (!acceptedTerms) return;
 
     if (deliveryMode === "time" && !confirmed) {
-      alert("Bạn vui lòng XÁC NHẬN THỜI GIAN trước khi thanh toán!");
+      alert("Bạn vui lòng xác nhận thời gian trước khi thanh toán!");
       return;
     }
 
@@ -247,16 +343,20 @@ const Cart: React.FC = () => {
       <div className="cartPage">
         <div className="cartContainer">
           <div className="cartGrid">
-            {/* LEFT */}
             <div className="cartLeft">
               <div className="cartCard">
                 <h2 className="cartTitle">Giỏ hàng của bạn</h2>
+
                 <p className="cartSub">
                   Bạn đang có <b>{items.length}</b> sản phẩm trong giỏ hàng
                 </p>
 
                 <div className="cartList">
-                  {items.length === 0 ? (
+                  {loading ? (
+                    <div style={{ padding: 20, fontWeight: 700 }}>
+                      Đang tải giỏ hàng...
+                    </div>
+                  ) : items.length === 0 ? (
                     <div className="cartEmpty">
                       <div className="cartEmpty__icon">🛒</div>
                       <div className="cartEmpty__title">Giỏ hàng đang trống</div>
@@ -272,6 +372,7 @@ const Cart: React.FC = () => {
                           type="button"
                           onClick={() => removeItem(it.id)}
                           title="Xoá"
+                          disabled={updatingId === it.id}
                         >
                           Xoá
                         </button>
@@ -282,9 +383,8 @@ const Cart: React.FC = () => {
                             alt={it.name}
                             loading="lazy"
                             onError={(e) => {
-                              const img = e.currentTarget;
-                              img.onerror = null;
-                              img.src = FALLBACK_IMG;
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = FALLBACK_IMG;
                             }}
                           />
                         </div>
@@ -303,6 +403,7 @@ const Cart: React.FC = () => {
                             <span className="cartItem__price">
                               {formatVND(it.price)}
                             </span>
+
                             {it.oldPrice ? (
                               <span className="cartItem__old">
                                 {formatVND(it.oldPrice)}
@@ -321,14 +422,20 @@ const Cart: React.FC = () => {
                               type="button"
                               onClick={() => updateQty(it.id, it.qty - 1)}
                               aria-label="Giảm"
+                              disabled={updatingId === it.id || it.qty <= 1}
                             >
                               –
                             </button>
-                            <div className="qty__val">{it.qty}</div>
+
+                            <div className="qty__val">
+                              {updatingId === it.id ? "..." : it.qty}
+                            </div>
+
                             <button
                               type="button"
                               onClick={() => updateQty(it.id, it.qty + 1)}
                               aria-label="Tăng"
+                              disabled={updatingId === it.id}
                             >
                               +
                             </button>
@@ -339,9 +446,9 @@ const Cart: React.FC = () => {
                   )}
                 </div>
 
-                {/* NOTE */}
                 <div className="cartBlock">
                   <div className="cartBlock__title">Ghi chú đơn hàng</div>
+
                   <textarea
                     className="cartNote"
                     value={note}
@@ -361,7 +468,6 @@ const Cart: React.FC = () => {
               </div>
             </div>
 
-            {/* RIGHT */}
             <div className="cartRight">
               <div className="cartCard">
                 <h3 className="rightTitle">Thông tin đơn hàng</h3>
@@ -421,6 +527,7 @@ const Cart: React.FC = () => {
 
                         <div className="shipField">
                           <div className="shipField__label">Thời gian giao</div>
+
                           <select
                             className="shipSelect"
                             value={deliverySlot}
@@ -490,14 +597,13 @@ const Cart: React.FC = () => {
                 <button
                   className="checkoutBtn"
                   type="button"
-                  disabled={!acceptedTerms || items.length === 0}
+                  disabled={!acceptedTerms || items.length === 0 || loading}
                   onClick={onCheckout}
                 >
                   THANH TOÁN
                 </button>
               </div>
 
-              {/* POLICY */}
               <div className="policyBox">
                 <div className="policyTitle">Chính sách mua hàng:</div>
                 <div className="policyText">
@@ -506,7 +612,6 @@ const Cart: React.FC = () => {
                 </div>
               </div>
 
-              {/* ✅ PROMOTIONS (đã sửa theo hình) */}
               <div className="promoBox">
                 <div className="promoHead">
                   <div className="promoHead__title">Khuyến mãi dành cho bạn</div>
@@ -591,6 +696,7 @@ const Cart: React.FC = () => {
                   <span>Số lượng</span>
                   <b>{cartCount}</b>
                 </div>
+
                 <div className="miniSummary__row">
                   <span>Tạm tính</span>
                   <b>{formatVND(subtotal)}</b>

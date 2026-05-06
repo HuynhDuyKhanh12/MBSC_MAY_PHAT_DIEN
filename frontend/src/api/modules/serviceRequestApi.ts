@@ -58,3 +58,8 @@ export const assignTechnicianApi = async (
   const res = await axiosClient.patch(`/service-requests/${id}/assign`, payload);
   return res.data;
 };
+
+export const createServiceRequestApi = async (payload: any) => {
+  const res = await axiosClient.post("/service-requests", payload);
+  return res.data;
+};

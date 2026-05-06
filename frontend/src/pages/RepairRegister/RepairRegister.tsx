@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import "./repair-register.css";
+import { createServiceRequestApi } from "../../api/modules/serviceRequestApi";
 
 type ServiceType = "warranty" | "repair";
 
@@ -11,16 +12,14 @@ type FormState = {
   phone: string;
   email: string;
   address: string;
-
   productName: string;
   model: string;
   serial: string;
-  purchaseDate: string; // yyyy-mm-dd
+  purchaseDate: string;
   invoiceNo: string;
-
   problem: string;
-  preferredDate: string; // yyyy-mm-dd
-  preferredTime: string; // HH:mm
+  preferredDate: string;
+  preferredTime: string;
   note: string;
 };
 
@@ -44,8 +43,8 @@ const initState: FormState = {
 const RepairRegister: React.FC = () => {
   const [form, setForm] = useState<FormState>(initState);
   const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState<string>("");
-  const [err, setErr] = useState<string>("");
+  const [done, setDone] = useState("");
+  const [err, setErr] = useState("");
 
   const title = useMemo(() => {
     return form.serviceType === "warranty"
@@ -56,7 +55,9 @@ const RepairRegister: React.FC = () => {
   const onChange =
     (key: keyof FormState) =>
     (
-      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+      e: React.ChangeEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >
     ) => {
       setForm((prev) => ({ ...prev, [key]: e.target.value }));
     };
@@ -81,25 +82,66 @@ const RepairRegister: React.FC = () => {
       return;
     }
 
+    const fullName = form.fullName.trim();
+    const phone = form.phone.trim();
+    const email = form.email.trim();
+    const address = form.address.trim();
+    const productName = form.productName.trim();
+    const model = form.model.trim();
+    const serial = form.serial.trim();
+    const problem = form.problem.trim();
+    const note = form.note.trim();
+
     try {
       setLoading(true);
 
-      // ✅ gọi backend
-      const res = await fetch("http://localhost:5000/api/service-requests", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+      const payload = {
+        customerName: fullName,
+        customerPhone: phone,
+        customerEmail: email || undefined,
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.message || "Gửi yêu cầu thất bại.");
+        province: address,
+        district: "Chưa nhập",
+        ward: "Chưa nhập",
+        detailAddress: address,
+
+        productName,
+        model: model || undefined,
+        serialNumber: serial || undefined,
+        purchaseDate: form.purchaseDate || undefined,
+        invoiceNo: form.invoiceNo || undefined,
+
+        type: form.serviceType === "warranty" ? "MAINTENANCE" : "REPAIR",
+
+        issueTitle: `${
+          form.serviceType === "warranty" ? "Bảo hành" : "Sửa chữa"
+        } - ${productName}`,
+        description: problem,
+        issueDescription: problem,
+
+        preferredDate: form.preferredDate || undefined,
+        preferredTime: form.preferredTime || undefined,
+        note: note || undefined,
+      };
+
+      const res = await createServiceRequestApi(payload);
 
       setDone(
-        "Đã gửi đăng ký thành công! Bộ phận kỹ thuật sẽ liên hệ sớm. (Email đã được gửi.)"
+        res?.message ||
+          "Đã gửi đăng ký thành công! Bộ phận kỹ thuật sẽ liên hệ sớm."
       );
+
       setForm(initState);
     } catch (error: any) {
-      setErr(error?.message || "Có lỗi xảy ra.");
+      const data = error?.response?.data || error;
+
+      console.log("REPAIR REGISTER ERROR:", data);
+
+      setErr(
+        typeof data?.message === "string"
+          ? data.message
+          : JSON.stringify(data, null, 2)
+      );
     } finally {
       setLoading(false);
     }
@@ -123,15 +165,26 @@ const RepairRegister: React.FC = () => {
             <div className="rr__tabs" role="tablist" aria-label="service type">
               <button
                 type="button"
-                className={`rr__tab ${form.serviceType === "warranty" ? "is-active" : ""}`}
-                onClick={() => setForm((p) => ({ ...p, serviceType: "warranty" }))}
+                className={`rr__tab ${
+                  form.serviceType === "warranty" ? "is-active" : ""
+                }`}
+                onClick={() =>
+                  setForm((p) => ({ ...p, serviceType: "warranty" }))
+                }
+                disabled={loading}
               >
                 Đăng ký bảo hành
               </button>
+
               <button
                 type="button"
-                className={`rr__tab ${form.serviceType === "repair" ? "is-active" : ""}`}
-                onClick={() => setForm((p) => ({ ...p, serviceType: "repair" }))}
+                className={`rr__tab ${
+                  form.serviceType === "repair" ? "is-active" : ""
+                }`}
+                onClick={() =>
+                  setForm((p) => ({ ...p, serviceType: "repair" }))
+                }
+                disabled={loading}
               >
                 Đăng ký sửa chữa
               </button>
@@ -149,47 +202,92 @@ const RepairRegister: React.FC = () => {
               <div className="rr__grid">
                 <div className="rr__field">
                   <label>Họ và tên *</label>
-                  <input value={form.fullName} onChange={onChange("fullName")} placeholder="VD: Huỳnh Duy Khánh" />
+                  <input
+                    value={form.fullName}
+                    onChange={onChange("fullName")}
+                    placeholder="VD: Huỳnh Duy Khánh"
+                    disabled={loading}
+                  />
                 </div>
 
                 <div className="rr__field">
                   <label>Số điện thoại *</label>
-                  <input value={form.phone} onChange={onChange("phone")} placeholder="VD: 09xxxxxxxx" />
+                  <input
+                    value={form.phone}
+                    onChange={onChange("phone")}
+                    placeholder="VD: 09xxxxxxxx"
+                    disabled={loading}
+                  />
                 </div>
 
                 <div className="rr__field">
-                  <label>Email (để nhận phản hồi)</label>
-                  <input value={form.email} onChange={onChange("email")} placeholder="VD: you@email.com" />
+                  <label>Email</label>
+                  <input
+                    value={form.email}
+                    onChange={onChange("email")}
+                    placeholder="VD: you@email.com"
+                    disabled={loading}
+                  />
                 </div>
 
                 <div className="rr__field rr__field--full">
-                  <label>Địa chỉ *</label>
-                  <input value={form.address} onChange={onChange("address")} placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành" />
+                  <label>Địa chỉ / Tỉnh thành *</label>
+                  <input
+                    value={form.address}
+                    onChange={onChange("address")}
+                    placeholder="VD: TP.HCM, Bến Tre..."
+                    disabled={loading}
+                  />
                 </div>
 
                 <div className="rr__field">
                   <label>Tên sản phẩm *</label>
-                  <input value={form.productName} onChange={onChange("productName")} placeholder="VD: Máy phát điện diesel 10KVA" />
+                  <input
+                    value={form.productName}
+                    onChange={onChange("productName")}
+                    placeholder="VD: Máy phát điện diesel 10KVA"
+                    disabled={loading}
+                  />
                 </div>
 
                 <div className="rr__field">
                   <label>Model</label>
-                  <input value={form.model} onChange={onChange("model")} placeholder="VD: KUBOTA-10KVA" />
+                  <input
+                    value={form.model}
+                    onChange={onChange("model")}
+                    placeholder="VD: KUBOTA-10KVA"
+                    disabled={loading}
+                  />
                 </div>
 
                 <div className="rr__field">
                   <label>Serial</label>
-                  <input value={form.serial} onChange={onChange("serial")} placeholder="Số serial trên máy" />
+                  <input
+                    value={form.serial}
+                    onChange={onChange("serial")}
+                    placeholder="Số serial trên máy"
+                    disabled={loading}
+                  />
                 </div>
 
                 <div className="rr__field">
                   <label>Ngày mua</label>
-                  <input type="date" value={form.purchaseDate} onChange={onChange("purchaseDate")} />
+                  <input
+                    type="date"
+                    value={form.purchaseDate}
+                    onChange={onChange("purchaseDate")}
+                    disabled={loading}
+                  />
                 </div>
 
                 <div className="rr__field">
                   <label>Số hoá đơn</label>
-                  <input value={form.invoiceNo} onChange={onChange("invoiceNo")} placeholder="Nếu có" />
+                  <input
+                    value={form.invoiceNo}
+                    onChange={onChange("invoiceNo")}
+                    placeholder="Nếu có"
+                    disabled={loading}
+                  />
                 </div>
 
                 <div className="rr__field rr__field--full">
@@ -199,22 +297,39 @@ const RepairRegister: React.FC = () => {
                     onChange={onChange("problem")}
                     rows={4}
                     placeholder="VD: Máy khó nổ, chạy rung mạnh, báo lỗi..."
+                    disabled={loading}
                   />
                 </div>
 
                 <div className="rr__field">
-                  <label>Ngày hẹn (tuỳ chọn)</label>
-                  <input type="date" value={form.preferredDate} onChange={onChange("preferredDate")} />
+                  <label>Ngày hẹn</label>
+                  <input
+                    type="date"
+                    value={form.preferredDate}
+                    onChange={onChange("preferredDate")}
+                    disabled={loading}
+                  />
                 </div>
 
                 <div className="rr__field">
-                  <label>Giờ hẹn (tuỳ chọn)</label>
-                  <input type="time" value={form.preferredTime} onChange={onChange("preferredTime")} />
+                  <label>Giờ hẹn</label>
+                  <input
+                    type="time"
+                    value={form.preferredTime}
+                    onChange={onChange("preferredTime")}
+                    disabled={loading}
+                  />
                 </div>
 
                 <div className="rr__field rr__field--full">
                   <label>Ghi chú thêm</label>
-                  <textarea value={form.note} onChange={onChange("note")} rows={3} placeholder="VD: gửi hình, yêu cầu kỹ thuật..." />
+                  <textarea
+                    value={form.note}
+                    onChange={onChange("note")}
+                    rows={3}
+                    placeholder="VD: gửi hình, yêu cầu kỹ thuật..."
+                    disabled={loading}
+                  />
                 </div>
               </div>
 
@@ -222,6 +337,7 @@ const RepairRegister: React.FC = () => {
                 <button className="rr__btn" type="submit" disabled={loading}>
                   {loading ? "Đang gửi..." : "Gửi đăng ký"}
                 </button>
+
                 <button
                   className="rr__btn rr__btn--ghost"
                   type="button"
@@ -237,8 +353,7 @@ const RepairRegister: React.FC = () => {
               </div>
 
               <p className="rr__hint">
-                Sau khi gửi, hệ thống sẽ chuyển thông tin về email quản trị:
-                <b> huynhkhanh1177@gmail.com</b>
+                Sau khi gửi, hệ thống sẽ chuyển thông tin về bộ phận quản trị.
               </p>
             </form>
           </div>

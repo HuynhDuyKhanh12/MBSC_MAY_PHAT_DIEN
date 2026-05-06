@@ -25,14 +25,14 @@ const Footer: React.FC = () => {
       <div className="ft-main">
         <div className="container ft-grid">
           <div className="ft-col">
-            <div className="ft-title">Về Flycam24h</div>
+            <div className="ft-title">Về MáyPhátĐiệnTĐ</div>
             <p className="ft-text">
-              Với các giải pháp công nghệ tốt nhất, Flycam24h là tất cả những gì bạn
+              Với các giải pháp công nghệ tốt nhất, MáyPhátĐiệnTĐ là tất cả những gì bạn
               cần để xây dựng thương hiệu online.
             </p>
             <div className="ft-text">📍 182 Lê Đại Hành, Q11, TP.HCM</div>
-            <div className="ft-text">☎ 1900.000.XXX</div>
-            <div className="ft-text">✉ hi@flycam24h.abc</div>
+            <div className="ft-text">☎ 0327578005</div>
+            <div className="ft-text">✉ Nguyentandat8005@gmail.com</div>
           </div>
 
           <div className="ft-col">
@@ -64,7 +64,7 @@ const Footer: React.FC = () => {
         </div>
 
         <div className="ft-copy">
-          Copyright © 2026 FlyCam24h. Powered by Haravan
+          Copyright © 2026 MáyPhátĐiệnTĐ. Powered by Haravan
         </div>
       </div>
     </footer>

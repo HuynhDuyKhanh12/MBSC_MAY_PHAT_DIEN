@@ -1,3 +1,13 @@
+/* ===== GLOBAL FONT ===== */
+.bdPage,
+.bdPage * {
+  font-family: "Times New Roman", Times, serif;
+  box-sizing: border-box;
+}
+
+/* =========================
+   PAGE
+========================= */
 .bdPage {
   background: #fff;
   padding: 18px 0 40px;
@@ -8,6 +18,9 @@
   margin: 0 auto;
 }
 
+/* =========================
+   GRID
+========================= */
 .bdGrid {
   display: grid;
   grid-template-columns: 1fr 340px;
@@ -18,11 +31,15 @@
   min-width: 0;
 }
 
+/* =========================
+   TITLE
+========================= */
 .bdH1 {
   margin: 0 0 8px;
   font-size: 22px;
   font-weight: 900;
   color: #111827;
+  letter-spacing: 0.3px;
 }
 
 .bdMeta {
@@ -34,10 +51,14 @@
   margin-bottom: 12px;
 }
 
+/* =========================
+   HERO IMAGE
+========================= */
 .bdHero {
   border: 1px solid #ececec;
   background: #fff;
 }
+
 .bdHero img {
   width: 100%;
   height: 320px;
@@ -45,80 +66,111 @@
   display: block;
 }
 
+/* =========================
+   CONTENT
+========================= */
 .bdContent {
   padding: 14px 0 0;
   color: #374151;
-  line-height: 1.85;
-  font-size: 14px;
+  line-height: 1.9;
+  font-size: 15px;
 }
+
 .bdContent h2 {
   margin: 18px 0 10px;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 900;
   color: #111827;
+  letter-spacing: 0.2px;
 }
+
 .bdContent ul {
   padding-left: 18px;
 }
+
+.bdContent li {
+  margin-bottom: 6px;
+}
+
 .bdContent blockquote {
   margin: 14px 0;
   padding: 12px 14px;
   border-left: 3px solid #10b981;
   background: #ecfdf5;
   color: #065f46;
+  font-style: italic;
 }
 
-/* Related */
+/* =========================
+   RELATED
+========================= */
 .bdRelated {
   margin-top: 22px;
   border-top: 1px solid #eee;
   padding-top: 14px;
 }
+
 .bdRelated__head {
   font-weight: 900;
   color: #111827;
   margin-bottom: 10px;
+  font-size: 16px;
 }
+
 .bdRelated__grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 14px;
 }
+
 .relCard {
   text-decoration: none;
   border: 1px solid #ececec;
   background: #fff;
   color: #111827;
+  transition: 0.2s ease;
 }
+
 .relCard__img img {
   width: 100%;
   height: 120px;
   object-fit: cover;
   display: block;
 }
+
 .relCard__title {
   padding: 10px 10px 6px;
   font-weight: 900;
-  font-size: 12px;
-  line-height: 1.35;
+  font-size: 13px;
+  line-height: 1.4;
 }
+
 .relCard__meta {
   padding: 0 10px 10px;
   font-size: 11px;
   color: #9ca3af;
 }
+
+.relCard:hover {
+  transform: translateY(-2px);
+}
+
 .relCard:hover .relCard__title {
   color: #2563eb;
 }
 
-/* Sidebar reuse (same class names as blog.css) */
+/* =========================
+   SIDEBAR
+========================= */
 .bdSide {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-/* back link */
+/* =========================
+   BACK LINK
+========================= */
 .bdBack {
   display: inline-block;
   text-decoration: none;
@@ -127,14 +179,18 @@
   font-size: 13px;
 }
 
-/* responsive */
+/* =========================
+   RESPONSIVE
+========================= */
 @media (max-width: 980px) {
   .bdGrid {
     grid-template-columns: 1fr;
   }
+
   .bdHero img {
     height: 240px;
   }
+
   .bdRelated__grid {
     grid-template-columns: 1fr;
   }
